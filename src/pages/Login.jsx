@@ -20,7 +20,7 @@ const LoginPage = () => {
             return;
         }
 
-        // Simulate an API call
+
         try {
             // In a real application, you would send these credentials to your backend
             // const response = await fetch('/api/login', {
