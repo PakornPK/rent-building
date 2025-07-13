@@ -2,20 +2,25 @@ import { createBrowserRouter } from 'react-router'
 import Home from "./pages/Home";
 import Layout from './layouts/Layout';
 import Login from "./pages/Login";
+import User from './pages/User';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Layout />, // กำหนดให้เส้นทางหลักใช้ Layout
-    children: [ 
+    children: [
       {
-        index: true, 
+        index: true,
         element: <Home />,
       },
+      {
+        path: "/user",
+        element: <User />
+      }
     ],
   },
   {
-    path: 'login', 
+    path: 'login',
     element: <Login />,
   },
   {

@@ -35,23 +35,23 @@ const Sidebar = () => {
         transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
         transition-transform duration-300 ease-in-out z-40`}
       >
-        <h2 className="text-2xl font-semibold mb-6">My Dashboard</h2>
+        <h2 className="text-2xl font-semibold mb-6">Rent Building</h2>
         <nav>
           <ul>
             <li className="mb-4">
-              <Link to="/" className="flex items-center text-lg hover:text-blue-400">
+              <Link to="/dashboard" className="flex items-center text-lg hover:text-blue-400">
                 <HomeIcon className="h-5 w-5 mr-3" />
                 Dashboard
               </Link>
             </li>
             <li className="mb-4">
-              <Link to="/" className="flex items-center text-lg hover:text-blue-400">
+              <Link to="/user" className="flex items-center text-lg hover:text-blue-400">
                 <UserIcon className="h-5 w-5 mr-3" />
                 Users
               </Link>
             </li>
             <li className="mb-4">
-              <Link to="/" className="flex items-center text-lg hover:text-blue-400">
+              <Link to="/setting" className="flex items-center text-lg hover:text-blue-400">
                 <CogIcon className="h-5 w-5 mr-3" />
                 Settings
               </Link>
