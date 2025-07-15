@@ -1,6 +1,5 @@
-// src/components/Sidebar.jsx
 import { useState } from 'react';
-import { HomeIcon, UserIcon, CogIcon } from '@heroicons/react/24/solid'; // Example icons
+import { HomeIcon, UserIcon, CogIcon, BuildingOffice2Icon } from '@heroicons/react/24/solid'; // Example icons
 import { Link } from 'react-router';
 
 const Sidebar = () => {
@@ -48,6 +47,12 @@ const Sidebar = () => {
               <Link to="/user" className="flex items-center text-lg hover:text-blue-400">
                 <UserIcon className="h-5 w-5 mr-3" />
                 Users
+              </Link>
+            </li>
+            <li className='mb-4'>
+              <Link to="/rental" className='flex items-center text-lg hover:text-blue-400'>
+                <BuildingOffice2Icon className='h-5 w-5 mr-3' />
+                Rental
               </Link>
             </li>
             <li className="mb-4">

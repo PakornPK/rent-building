@@ -1,4 +1,3 @@
-// src/components/Pagination.jsx
 import React from 'react';
 
 const Pagination = ({ totalItems, pageSize, currentPage, onPageChange }) => {
@@ -18,7 +17,6 @@ const Pagination = ({ totalItems, pageSize, currentPage, onPageChange }) => {
   return (
     <nav className="flex items-center justify-center p-4">
       <ul className="flex list-style-none">
-        {/* ปุ่ม "ก่อนหน้า" */}
         <li className={`mx-1 ${currentPage === 1 ? 'pointer-events-none opacity-50' : ''}`}>
           <button
             onClick={() => onPageChange(currentPage - 1)}
@@ -28,7 +26,6 @@ const Pagination = ({ totalItems, pageSize, currentPage, onPageChange }) => {
           </button>
         </li>
 
-        {/* ปุ่มเลขหน้า */}
         {getPageNumbers().map((page) => (
           <li key={page} className="mx-1">
             <button
@@ -41,7 +38,6 @@ const Pagination = ({ totalItems, pageSize, currentPage, onPageChange }) => {
           </li>
         ))}
 
-        {/* ปุ่ม "ถัดไป" */}
         <li className={`mx-1 ${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}`}>
           <button
             onClick={() => onPageChange(currentPage + 1)}

@@ -1,4 +1,3 @@
-// src/components/Table.jsx
 import React from 'react';
 
 const Table = ({ data, columns, pageSize, currentPage }) => {
