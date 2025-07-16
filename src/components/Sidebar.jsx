@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { HomeIcon, UserIcon, CogIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/solid'; // Example icons
+import { HomeIcon, UserIcon, CogIcon, ClipboardDocumentListIcon, BuildingOffice2Icon } from '@heroicons/react/24/solid'; // Example icons
 import { Link } from 'react-router';
 
 const Sidebar = () => {
@@ -53,6 +53,12 @@ const Sidebar = () => {
               <Link to="/rental-management" className='flex items-center text-lg hover:text-blue-400'>
                 <ClipboardDocumentListIcon className='h-5 w-5 mr-3' />
                 Rental Management
+              </Link>
+            </li>
+            <li className='mb-4'>
+              <Link to="/room-management" className='flex items-center text-lg hover:text-blue-400'>
+                <BuildingOffice2Icon className='h-5 w-5 mr-3' />
+                Room Management
               </Link>
             </li>
             <li className="mb-4">

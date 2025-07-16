@@ -169,7 +169,7 @@ function RentalManagement() {
             {isModalOpen && (
                 <Modal className="max-w-4xl">
                     <div className='flex flex-col gap-3'>
-                        <div className='text-2xl p-4 text-center'>เพิ่มห้องเช่า</div>
+                        <div className='text-2xl p-4 text-center'>เพิ่มรายการ</div>
                         <div className='flex bg-neutral-200 p-3 gap-3 rounded-lg'>
                             <div className='flex-1 border-r-1'>
                                 <label>Upload File (*.csv)</label>

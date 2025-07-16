@@ -4,6 +4,7 @@ import Layout from './layouts/Layout';
 import Login from "./pages/Login";
 import User from './pages/User';
 import RentalManagement from './pages/RentalManagement';
+import RoomManagement from './pages/RoomManagement';
 
 const router = createBrowserRouter([
   {
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
       {
         path: "/rental-management",
         element: <RentalManagement />
+      },
+      {
+        path: "/room-management",
+        element: <RoomManagement />
       },
       {
         path: "/user",
