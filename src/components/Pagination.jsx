@@ -31,7 +31,7 @@ const Pagination = ({ totalItems, pageSize, currentPage, onPageChange }) => {
             <button
               onClick={() => onPageChange(page)}
               className={`px-3 py-1 text-sm transition duration-150 ease-in-out rounded-md
-                ${page === currentPage ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'}`}
+                ${page === currentPage ? 'bg-blue-400 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'}`}
             >
               {page}
             </button>
