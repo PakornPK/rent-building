@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Pagination = ({ totalItems, pageSize, currentPage, onPageChange }) => {
-  const totalPages = Math.ceil(totalItems / pageSize);
+  const totalPages = Math?.ceil(totalItems / pageSize) || 1;
 
   // ถ้ามีหน้าเดียวก็นำ Pagination ออกไป
   if (totalPages <= 1) return null;

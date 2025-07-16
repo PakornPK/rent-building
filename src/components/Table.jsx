@@ -2,7 +2,7 @@ import React from 'react';
 
 const Table = ({ data, columns, pageSize, currentPage }) => {
   const startIndex = (currentPage - 1) * pageSize;
-  const currentData = data.slice(startIndex, startIndex + pageSize);
+  const currentData = data?.slice(startIndex, startIndex + pageSize) || [];
 
   return (
     <div className="overflow-x-auto shadow-md sm:rounded-lg">

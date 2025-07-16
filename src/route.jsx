@@ -3,7 +3,7 @@ import Home from "./pages/Home";
 import Layout from './layouts/Layout';
 import Login from "./pages/Login";
 import User from './pages/User';
-import Rental from './pages/Rental';
+import RentalManagement from './pages/RentalManagement';
 
 const router = createBrowserRouter([
   {
@@ -15,8 +15,8 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "/rental",
-        element: <Rental />
+        path: "/rental-management",
+        element: <RentalManagement />
       },
       {
         path: "/user",
