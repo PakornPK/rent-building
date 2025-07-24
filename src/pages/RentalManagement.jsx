@@ -160,6 +160,9 @@ function RentalManagement() {
                     columns={COLUMNS}
                     pageSize={pageSize}
                     currentPage={currentPage}
+                    onView={(row) => console.log(row.id)}
+                    onEdit={(row) => console.log(row.id)}
+                    onDelete={(row) => console.log(row.id)}
                 />
 
                 <Pagination
