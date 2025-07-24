@@ -67,12 +67,6 @@ const Sidebar = () => {
                 Renter Management
               </Link>
             </li>
-            <li className="mb-4">
-              <Link to="/setting" className="flex items-center text-lg hover:text-blue-400">
-                <CogIcon className="h-5 w-5 mr-3" />
-                Settings
-              </Link>
-            </li>
           </ul>
         </nav>
       </div>
