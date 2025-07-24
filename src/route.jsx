@@ -1,10 +1,11 @@
 import { createBrowserRouter } from 'react-router'
-import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
 import Layout from './layouts/Layout';
 import Login from "./pages/Login";
 import User from './pages/User';
 import RentalManagement from './pages/RentalManagement';
 import RoomManagement from './pages/RoomManagement';
+import RenterManagement from './pages/RenterManagement';
 
 const router = createBrowserRouter([
   {
@@ -13,7 +14,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Home />,
+        element: <Dashboard />,
       },
       {
         path: "/rental-management",
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
       {
         path: "/room-management",
         element: <RoomManagement />
+      },
+      {
+        path: "/renter-management",
+        element: <RenterManagement />
       },
       {
         path: "/user",

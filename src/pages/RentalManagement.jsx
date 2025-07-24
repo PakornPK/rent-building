@@ -139,7 +139,8 @@ function RentalManagement() {
     };
     return (
         <div className='p-3'>
-            <div className='flex justify-between'>
+            <div className="container px-4 mx-auto">
+                <div className='flex justify-between'>
                 <div className='text-4xl p-3'>หน้าจัดการรายการใช้เช่า</div>
                 <div className='flex justify-end pb-3 pt-4'>
                     <Button
@@ -150,7 +151,10 @@ function RentalManagement() {
                     </Button>
                 </div>
             </div>
-            <div>
+            </div>
+            <div className="container p-4 mx-auto mt-8">
+                <h1 className="mb-4 text-2xl font-bold">ตารางข้อมูลผู้ใช้งาน</h1>
+
                 <Table
                     data={DATA}
                     columns={COLUMNS}

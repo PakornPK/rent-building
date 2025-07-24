@@ -1,37 +1,30 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
+import Table from '../components/Table';
+import Pagination from '../components/Pagination';
 import Button from '../components/Button'
 import Modal from '../components/Modal';
 import UploadFile from '../components/UploadFile';
-import Table from '../components/Table';
-import Pagination from '../components/Pagination';
 
+const DUMMY_DATA = Array.from({ length: 100 }, (_, i) => ({
+    id: i + 1,
+    name: `ผู้ใช้งานคนที่ ${i + 1}`,
+    email: `user${i + 1}@example.com`,
+    role: i % 2 === 0 ? 'Admin' : 'User',
+}));
+
+// กำหนด Columns สำหรับตาราง
 const COLUMNS = [
     { header: 'ID', accessor: 'id' },
-    { header: 'หมายเลขตึก', accessor: 'building' },
-    { header: 'หมายเลขชั้น', accessor: 'floor' },
-    { header: 'หมายเลขห้อง', accessor: 'room' },
-    { header: 'ราคา (บาท)', accessor: 'price' },
-    { header: 'หน่วย', accessor: 'unit' },
-    { header: 'สถานะ', accessor: 'status' },
+    { header: 'ชื่อ', accessor: 'name' },
+    { header: 'อีเมล', accessor: 'email' },
+    { header: 'บทบาท', accessor: 'role' },
 ];
 
-const DATA = [
-    {
-        id: 1,
-        building: "A",
-        floor: "2",
-        room: "201",
-        price: "5,000",
-        unit: "เดือน",
-        status: "มีผู้เช่า"
-    }
-]
+const pageSize = 10; // จำนวนข้อมูลต่อหน้า
 
-const pageSize = 10;
-
-function RoomManagement() {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+function RenterManagement() {
     const [currentPage, setCurrentPage] = useState(1);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
@@ -39,28 +32,31 @@ function RoomManagement() {
         <div className='p-3'>
             <div className="container px-4 mx-auto">
                 <div className='flex justify-between'>
-                    <div className='text-4xl p-3'>หน้าจัดการห้องเช่า</div>
+                    <div className='text-4xl p-3'>หน้าจัดการผู้เช่า</div>
                     <div className='flex justify-end pb-3 pt-4'>
                         <Button
                             className="ml-3"
                             onClick={() => setIsModalOpen(true)}
                         >
-                            เพิ่มห้องเช่า
+                            เพิ่มผู้เช่า
                         </Button>
                     </div>
                 </div>
             </div>
             <div className="container p-4 mx-auto mt-8">
-                <h1 className="mb-4 text-2xl font-bold">ตารางข้อมูลห้องเช่า</h1>
+                <h1 className="mb-4 text-2xl font-bold">ตารางข้อมูลผู้เช่า</h1>
+
+                {/* ส่ง props ทั้งหมดไปให้ Table */}
                 <Table
-                    data={DATA}
+                    data={DUMMY_DATA}
                     columns={COLUMNS}
                     pageSize={pageSize}
                     currentPage={currentPage}
                 />
 
+                {/* ส่ง props ทั้งหมดไปให้ Pagination */}
                 <Pagination
-                    totalItems={DATA.length}
+                    totalItems={DUMMY_DATA.length}
                     pageSize={pageSize}
                     currentPage={currentPage}
                     onPageChange={handlePageChange}
@@ -70,7 +66,7 @@ function RoomManagement() {
             {isModalOpen && (
                 <Modal className="max-w-4xl">
                     <div className='flex flex-col gap-3'>
-                        <div className='text-2xl p-4 text-center'>เพิ่มห้องเช่า</div>
+                        <div className='text-2xl p-4 text-center'>เพิ่มผู้เช่า</div>
                         <div className='flex bg-neutral-200 p-3 gap-3 rounded-lg'>
                             <div className='flex-1 border-r-1'>
                                 <label>Upload File (*.csv)</label>
@@ -103,7 +99,7 @@ function RoomManagement() {
                 </Modal>
             )}
         </div>
-    )
+    );
 }
 
-export default RoomManagement
+export default RenterManagement
