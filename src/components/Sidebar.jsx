@@ -40,31 +40,31 @@ const Sidebar = () => {
             <li className="mb-4">
               <Link to="/" className="flex items-center text-lg hover:text-blue-400">
                 <HomeIcon className="h-5 w-5 mr-3" />
-                Dashboard
+                หน้าแรก
               </Link>
             </li>
             <li className="mb-4">
               <Link to="/user" className="flex items-center text-lg hover:text-blue-400">
                 <UserIcon className="h-5 w-5 mr-3" />
-                Users
+                จัดการผู้ใช้
               </Link>
             </li>
             <li className='mb-4'>
               <Link to="/rental-management" className='flex items-center text-lg hover:text-blue-400'>
                 <ClipboardDocumentListIcon className='h-5 w-5 mr-3' />
-                Rental Management
+                จัดการรายการใช้เช่า
               </Link>
             </li>
             <li className='mb-4'>
               <Link to="/room-management" className='flex items-center text-lg hover:text-blue-400'>
                 <BuildingOffice2Icon className='h-5 w-5 mr-3' />
-                Room Management
+                หน้าจัดการห้องเช่า
               </Link>
             </li>
             <li className='mb-4'>
               <Link to="/renter-management" className='flex items-center text-lg hover:text-blue-400'>
                 <UserCircleIcon className='h-5 w-5 mr-3' />
-                Renter Management
+                จัดการผู้เช่า
               </Link>
             </li>
           </ul>

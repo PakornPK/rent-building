@@ -1,5 +1,5 @@
 import { createBrowserRouter } from 'react-router'
-import Dashboard from "./pages/Dashboard";
+import Home from "./pages/Home";
 import Layout from './layouts/Layout';
 import Login from "./pages/Login";
 import User from './pages/User';
@@ -14,7 +14,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Dashboard />,
+        element: <Home />,
       },
       {
         path: "/rental-management",
