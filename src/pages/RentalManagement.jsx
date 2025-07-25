@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from "react-router-dom";
 import Button from '../components/Button'
 import Modal from '../components/Modal';
 import UploadFile from '../components/UploadFile';
@@ -134,6 +135,7 @@ const pageSize = 10;
 function RentalManagement() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const navigate = useNavigate();
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
@@ -141,16 +143,16 @@ function RentalManagement() {
         <div className='p-3'>
             <div className="container px-4 mx-auto">
                 <div className='flex justify-between'>
-                <div className='text-4xl p-3'>หน้าจัดการรายการใช้เช่า</div>
-                <div className='flex justify-end pb-3 pt-4'>
-                    <Button
-                        className="ml-3"
-                        onClick={() => setIsModalOpen(true)}
-                    >
-                        เพิ่มรายการ
-                    </Button>
+                    <div className='text-4xl p-3'>หน้าจัดการรายการใช้เช่า</div>
+                    <div className='flex justify-end pb-3 pt-4'>
+                        <Button
+                            className="ml-3"
+                            onClick={() => setIsModalOpen(true)}
+                        >
+                            เพิ่มรายการ
+                        </Button>
+                    </div>
                 </div>
-            </div>
             </div>
             <div className="container p-4 mx-auto mt-8">
                 <h1 className="mb-4 text-2xl font-bold">ตารางข้อมูลผู้ใช้งาน</h1>
@@ -161,7 +163,7 @@ function RentalManagement() {
                     pageSize={pageSize}
                     currentPage={currentPage}
                     onView={(row) => console.log(row.id)}
-                    onEdit={(row) => console.log(row.id)}
+                    onEdit={(row) => navigate("/rental-management/"+ row.id)}
                     onDelete={(row) => console.log(row.id)}
                 />
 
