@@ -1,9 +1,17 @@
 import { useState } from 'react';
-import { HomeIcon, UserIcon, CogIcon, ClipboardDocumentListIcon, BuildingOffice2Icon, UserCircleIcon } from '@heroicons/react/24/solid'; // Example icons
-import { Link } from 'react-router';
+import { 
+  HomeIcon, 
+  UserIcon, 
+  ClipboardDocumentListIcon, 
+  BuildingOffice2Icon, 
+  UserCircleIcon, 
+  WrenchScrewdriverIcon, 
+  BoltIcon 
+} from '@heroicons/react/24/solid'; 
+import { NavLink } from 'react-router-dom'; // เปลี่ยนจาก 'react-router' เป็น 'react-router-dom'
 
 const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false); // State for mobile toggle
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
@@ -38,34 +46,81 @@ const Sidebar = () => {
         <nav>
           <ul>
             <li className="mb-4">
-              <Link to="/" className="flex items-center text-lg hover:text-blue-400">
+              <NavLink 
+                to="/" 
+                className={({ isActive }) =>
+                  `flex items-center text-lg ${isActive ? 'text-blue-400' : 'hover:text-blue-400'}`
+                }
+              >
                 <HomeIcon className="h-5 w-5 mr-3" />
                 หน้าแรก
-              </Link>
+              </NavLink>
             </li>
             <li className="mb-4">
-              <Link to="/user" className="flex items-center text-lg hover:text-blue-400">
+              <NavLink 
+                to="/user" 
+                className={({ isActive }) =>
+                  `flex items-center text-lg ${isActive ? 'text-blue-400' : 'hover:text-blue-400'}`
+                }
+              >
                 <UserIcon className="h-5 w-5 mr-3" />
                 จัดการผู้ใช้
-              </Link>
+              </NavLink>
             </li>
             <li className='mb-4'>
-              <Link to="/rental-management" className='flex items-center text-lg hover:text-blue-400'>
+              <NavLink 
+                to="/rental-management" 
+                className={({ isActive }) =>
+                  `flex items-center text-lg ${isActive ? 'text-blue-400' : 'hover:text-blue-400'}`
+                }
+              >
                 <ClipboardDocumentListIcon className='h-5 w-5 mr-3' />
                 จัดการรายการใช้เช่า
-              </Link>
+              </NavLink>
             </li>
             <li className='mb-4'>
-              <Link to="/room-management" className='flex items-center text-lg hover:text-blue-400'>
+              <NavLink 
+                to="/room-management" 
+                className={({ isActive }) =>
+                  `flex items-center text-lg ${isActive ? 'text-blue-400' : 'hover:text-blue-400'}`
+                }
+              >
                 <BuildingOffice2Icon className='h-5 w-5 mr-3' />
                 หน้าจัดการห้องเช่า
-              </Link>
+              </NavLink>
             </li>
             <li className='mb-4'>
-              <Link to="/renter-management" className='flex items-center text-lg hover:text-blue-400'>
+              <NavLink 
+                to="/renter-management" 
+                className={({ isActive }) =>
+                  `flex items-center text-lg ${isActive ? 'text-blue-400' : 'hover:text-blue-400'}`
+                }
+              >
                 <UserCircleIcon className='h-5 w-5 mr-3' />
                 จัดการผู้เช่า
-              </Link>
+              </NavLink>
+            </li>
+            <li className='mb-4'>
+              <NavLink 
+                to="/utilities-cost" 
+                className={({ isActive }) =>
+                  `flex items-center text-lg ${isActive ? 'text-blue-400' : 'hover:text-blue-400'}`
+                }
+              >
+                <BoltIcon className='h-5 w-5 mr-3' />
+                ค่าน้ำค่าไฟ
+              </NavLink>
+            </li>
+            <li className='mb-4'>
+              <NavLink 
+                to="/healthdesk" 
+                className={({ isActive }) =>
+                  `flex items-center text-lg ${isActive ? 'text-blue-400' : 'hover:text-blue-400'}`
+                }
+              >
+                <WrenchScrewdriverIcon className='h-5 w-5 mr-3' />
+                แจ้งซ่อม
+              </NavLink>
             </li>
           </ul>
         </nav>
