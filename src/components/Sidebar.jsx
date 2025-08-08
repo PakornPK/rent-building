@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { 
-  HomeIcon, 
-  UserIcon, 
-  ClipboardDocumentListIcon, 
-  BuildingOffice2Icon, 
-  UserCircleIcon, 
-  WrenchScrewdriverIcon, 
-  BoltIcon 
-} from '@heroicons/react/24/solid'; 
+import {
+  HomeIcon,
+  UserIcon,
+  ClipboardDocumentListIcon,
+  BuildingOffice2Icon,
+  UserCircleIcon,
+  WrenchScrewdriverIcon,
+  BoltIcon,
+  ArrowLeftStartOnRectangleIcon
+} from '@heroicons/react/24/solid';
 import { NavLink } from 'react-router-dom'; // เปลี่ยนจาก 'react-router' เป็น 'react-router-dom'
 
 const Sidebar = () => {
@@ -46,8 +47,8 @@ const Sidebar = () => {
         <nav>
           <ul>
             <li className="mb-4">
-              <NavLink 
-                to="/" 
+              <NavLink
+                to="/"
                 className={({ isActive }) =>
                   `flex items-center text-lg ${isActive ? 'text-blue-400' : 'hover:text-blue-400'}`
                 }
@@ -57,8 +58,8 @@ const Sidebar = () => {
               </NavLink>
             </li>
             <li className="mb-4">
-              <NavLink 
-                to="/user" 
+              <NavLink
+                to="/user"
                 className={({ isActive }) =>
                   `flex items-center text-lg ${isActive ? 'text-blue-400' : 'hover:text-blue-400'}`
                 }
@@ -68,8 +69,8 @@ const Sidebar = () => {
               </NavLink>
             </li>
             <li className='mb-4'>
-              <NavLink 
-                to="/rental-management" 
+              <NavLink
+                to="/rental-management"
                 className={({ isActive }) =>
                   `flex items-center text-lg ${isActive ? 'text-blue-400' : 'hover:text-blue-400'}`
                 }
@@ -79,8 +80,8 @@ const Sidebar = () => {
               </NavLink>
             </li>
             <li className='mb-4'>
-              <NavLink 
-                to="/room-management" 
+              <NavLink
+                to="/room-management"
                 className={({ isActive }) =>
                   `flex items-center text-lg ${isActive ? 'text-blue-400' : 'hover:text-blue-400'}`
                 }
@@ -90,8 +91,8 @@ const Sidebar = () => {
               </NavLink>
             </li>
             <li className='mb-4'>
-              <NavLink 
-                to="/renter-management" 
+              <NavLink
+                to="/renter-management"
                 className={({ isActive }) =>
                   `flex items-center text-lg ${isActive ? 'text-blue-400' : 'hover:text-blue-400'}`
                 }
@@ -101,8 +102,8 @@ const Sidebar = () => {
               </NavLink>
             </li>
             <li className='mb-4'>
-              <NavLink 
-                to="/utilities-cost" 
+              <NavLink
+                to="/utilities-cost"
                 className={({ isActive }) =>
                   `flex items-center text-lg ${isActive ? 'text-blue-400' : 'hover:text-blue-400'}`
                 }
@@ -112,8 +113,8 @@ const Sidebar = () => {
               </NavLink>
             </li>
             <li className='mb-4'>
-              <NavLink 
-                to="/healthdesk" 
+              <NavLink
+                to="/healthdesk"
                 className={({ isActive }) =>
                   `flex items-center text-lg ${isActive ? 'text-blue-400' : 'hover:text-blue-400'}`
                 }
@@ -121,6 +122,14 @@ const Sidebar = () => {
                 <WrenchScrewdriverIcon className='h-5 w-5 mr-3' />
                 แจ้งซ่อม
               </NavLink>
+            </li>
+          </ul>
+          <ul className='absolute bottom-0'>
+            <li li className='mb-4'>
+              <div className='flex items-center text-lg hover:text-blue-400'>
+                <ArrowLeftStartOnRectangleIcon className='h-5 w-5 mr-3' />
+                Logout
+              </div>
             </li>
           </ul>
         </nav>
