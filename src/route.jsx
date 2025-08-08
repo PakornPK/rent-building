@@ -7,6 +7,8 @@ import RentalManagement from './pages/RentalManagement';
 import RoomManagement from './pages/RoomManagement';
 import RenterManagement from './pages/RenterManagement';
 import RentalView from './pages/RentalView';
+import UtilitiesCost from './pages/UtilitiesCost';
+import Healthdesk from './pages/Healthdesk';
 
 const router = createBrowserRouter([
   {
@@ -36,7 +38,15 @@ const router = createBrowserRouter([
       {
         path: "/user",
         element: <User />
-      }
+      },
+      {
+        path: "/utilities-cost",
+        element: <UtilitiesCost />
+      },
+      {
+        path: "/healthdesk",
+        element: <Healthdesk />
+      },
     ],
   },
   {
