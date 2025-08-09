@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/PakornPK/rent-building/internal/configs"
+	"github.com/PakornPK/rent-building/configs"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

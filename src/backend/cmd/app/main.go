@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/PakornPK/rent-building/configs"
 	"github.com/PakornPK/rent-building/infra"
-	"github.com/PakornPK/rent-building/internal/configs"
 	"github.com/gofiber/fiber/v2"
 )
 
