@@ -1,3 +1,4 @@
+//go:generate moq -out ../mocks/user_repository_mock.go -pkg mocks . UserRepository
 package repositories
 
 import (

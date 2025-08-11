@@ -1,5 +1,8 @@
-.PHONY: dev, db,db-down, migrate
+.PHONY: dev, db,db-down, migrate, init, generate, migrate-create, test
 
+init: 
+	go install go.uber.org/mock/mockgen@latest
+	go install github.com/matryer/moq@latest
 db:
 	docker compose -f scripts/docker/docker-compose.yml up -d db
 db-down:
@@ -17,3 +20,11 @@ migrate-create:
 	@read -p "Enter migration name: " MIGRATION_NAME; \
 	echo "Creating migration file: $$MIGRATION_NAME"; \
 	migrate create -ext sql -dir scripts/db/migrations -seq $$MIGRATION_NAME
+
+generate:
+	@echo "Generating code..."
+	go generate ./...
+
+test:
+	@echo "Running tests..."
+	go test -v ./... -cover
