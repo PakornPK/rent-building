@@ -8,7 +8,7 @@ import (
 
 	"github.com/PakornPK/rent-building/configs"
 	"github.com/PakornPK/rent-building/infra"
-	"github.com/PakornPK/rent-building/internal/api"
+	"github.com/PakornPK/rent-building/server"
 )
 
 func main() {
@@ -34,7 +34,7 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		if err := api.StartServer(db.GetConnectionDB(), &cfg.Server); err != nil {
+		if err := server.StartServer(db.GetConnectionDB(), &cfg.Server); err != nil {
 			serverErr <- err
 		}
 	}()
