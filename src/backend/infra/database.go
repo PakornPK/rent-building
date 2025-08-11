@@ -1,7 +1,6 @@
 package infra
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/PakornPK/rent-building/configs"
@@ -11,7 +10,8 @@ import (
 
 type Database interface {
 	Connect() error
-	DB() (*sql.DB, error)
+	GetConnectionDB() *ConnectionDB
+	Close() error
 }
 
 type database struct {
@@ -25,12 +25,21 @@ func NewDatabase(conf *configs.DatabaseConfig) Database {
 	}
 }
 
-type Connection struct {
-	Db *gorm.DB
+type ConnectionDB struct {
+	db *gorm.DB
 }
 
-func (d *database) DB() (*sql.DB, error) {
-	return d.db.DB()
+func (d *ConnectionDB) DB() *gorm.DB {
+	if d.db == nil {
+		panic("Database connection is not initialized")
+	}
+	return d.db
+}
+
+func (d *database) GetConnectionDB() *ConnectionDB {
+	return &ConnectionDB{
+		db: d.db,
+	}
 }
 
 func (d *database) Connect() error {
@@ -54,4 +63,12 @@ func (d *database) Connect() error {
 
 	d.db = db
 	return nil
+}
+
+func (d *database) Close() error {
+	sqlDB, err := d.db.DB()
+	if err != nil {
+		return err
+	}
+	return sqlDB.Close()
 }

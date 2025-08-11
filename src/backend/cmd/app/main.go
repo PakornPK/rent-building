@@ -1,12 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/PakornPK/rent-building/configs"
 	"github.com/PakornPK/rent-building/infra"
-	"github.com/gofiber/fiber/v2"
+	"github.com/PakornPK/rent-building/internal/api"
 )
 
 func main() {
@@ -21,20 +23,26 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer func() {
-		sqlDB, err := db.DB()
-		if err != nil {
-			log.Fatalf("Failed to get database instance: %v", err)
-		}
-		if err := sqlDB.Close(); err != nil {
+		if err := db.Close(); err != nil {
 			log.Fatalf("Failed to close database connection: %v", err)
 		}
 		log.Println("Database connection closed")
 	}()
 
-	app := fiber.New()
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
+	serverErr := make(chan error, 1)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	log.Fatal(app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)))
+	go func() {
+		if err := api.StartServer(db.GetConnectionDB(), &cfg.Server); err != nil {
+			serverErr <- err
+		}
+	}()
+
+	select {
+	case err := <-serverErr:
+		log.Fatalf("Server error: %v", err)
+	case <-quit:
+		log.Println("Shutting down server...")
+	}
 }
