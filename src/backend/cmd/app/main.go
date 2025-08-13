@@ -34,7 +34,7 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		if err := server.StartServer(db.GetConnectionDB(), &cfg.Server); err != nil {
+		if err := server.StartServer(db.GetConnectionDB(), *cfg); err != nil {
 			serverErr <- err
 		}
 	}()

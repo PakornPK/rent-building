@@ -1,4 +1,4 @@
-.PHONY: dev, db,db-down, migrate, init, generate, migrate-create, test
+.PHONY: dev, db,db-down, migrate, init, generate, migrate-create, test, certs-gen
 
 init: 
 	go install go.uber.org/mock/mockgen@latest
@@ -28,3 +28,8 @@ generate:
 test:
 	@echo "Running tests..."
 	go test -v ./... -cover
+
+certs-gen:
+	@echo "Generating certificates..."
+	./scripts/certs/generate_certs.sh
+	@echo "Certificates generated successfully."

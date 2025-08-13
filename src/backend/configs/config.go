@@ -12,6 +12,7 @@ import (
 type Config struct {
 	Database DatabaseConfig `mapstructure:",squash"`
 	Server   ServerConfig   `mapstructure:",squash"`
+	Auth     AuthConfig     `mapstructure:",squash"`
 }
 
 type ServerConfig struct {
@@ -26,6 +27,14 @@ type DatabaseConfig struct {
 	Database string `mapstructure:"DATABASE_NAME"`
 	SSL      bool   `mapstructure:"DATABASE_SSL"`
 	Debug    bool   `mapstructure:"DATABASE_DEBUG"`
+}
+
+type AuthConfig struct {
+	PublicKey  string `mapstructure:"AUTH_PUBLIC_KEY"`
+	PrivateKey string `mapstructure:"AUTH_PRIVATE_KEY"`
+	Issuer     string `mapstructure:"AUTH_ISSUER"`
+	ExpiresIn  int    `mapstructure:"AUTH_EXPIRES_IN"`
+	RefreshIn  int    `mapstructure:"AUTH_REFRESH_IN"`
 }
 
 func NewConfig() (*Config, error) {
