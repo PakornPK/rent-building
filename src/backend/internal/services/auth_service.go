@@ -11,6 +11,8 @@ import (
 
 type AuthService interface {
 	Login(input LoginInput) (*LoginOutput, error)
+	Logout(id int) error
+	RefreshToken(id int) (*LoginOutput, error)
 }
 
 type LoginInput struct {
@@ -97,6 +99,93 @@ func (s *authService) Login(input LoginInput) (*LoginOutput, error) {
 		}); err != nil {
 			return nil, err
 		}
+	}
+
+	return &LoginOutput{
+		AccessToken:  accToken,
+		RefreshToken: refToken,
+		TokenType:    "Bearer",
+	}, nil
+}
+
+func (s *authService) Logout(id int) error {
+	user, err := s.userService.GetByID(id)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return errors.New("user not found")
+	}
+
+	return s.userService.Update(id, UserInput{
+		AccessToken:        "",
+		RefreshToken:       "",
+		AccessTokenExpiry:  nil,
+		RefreshTokenExpiry: nil,
+	})
+}
+
+func (s *authService) RefreshToken(id int) (*LoginOutput, error) {
+	user, err := s.userService.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("user not found")
+	}
+
+	privateKey := s.cfg.PrivateKey
+	accExpiresIn := time.Minute * time.Duration(s.cfg.ExpiresIn)
+	refExpiresIn := time.Minute * time.Duration(s.cfg.RefreshIn)
+
+	accClaims := jwt.MapClaims{
+		"sub":    user.ID,
+		"email":  user.Email,
+		"org":    user.Organization,
+		"admin":  user.IsAdmin,
+		"active": user.IsActive,
+		"iss":    s.cfg.Issuer,
+		"iat":    time.Now().Unix(),
+		"exp":    time.Now().Add(accExpiresIn).Unix(),
+	}
+	refClaims := jwt.MapClaims{
+		"sub":    user.ID,
+		"org":    user.Organization,
+		"active": user.IsActive,
+		"iat":    time.Now().Unix(),
+		"exp":    time.Now().Add(refExpiresIn).Unix(),
+	}
+
+	tokenAccObj := jwt.NewWithClaims(jwt.SigningMethodRS256, accClaims)
+	tokenRefObj := jwt.NewWithClaims(jwt.SigningMethodRS256, refClaims)
+
+	var parsedPrivateKey interface{}
+	parsedPrivateKey, err = jwt.ParseRSAPrivateKeyFromPEM([]byte(privateKey))
+	if err != nil {
+		return nil, err
+	}
+
+	accToken, err := tokenAccObj.SignedString(parsedPrivateKey)
+	if err != nil {
+		return nil, err
+	}
+	refToken, err := tokenRefObj.SignedString(parsedPrivateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now()
+	accExp := now.Add(accExpiresIn)
+	refExp := now.Add(refExpiresIn)
+
+	if err := s.userService.Update(user.ID, UserInput{
+		LastLogin:          &now,
+		AccessToken:        accToken,
+		AccessTokenExpiry:  &accExp,
+		RefreshToken:       refToken,
+		RefreshTokenExpiry: &refExp,
+	}); err != nil {
+		return nil, err
 	}
 
 	return &LoginOutput{

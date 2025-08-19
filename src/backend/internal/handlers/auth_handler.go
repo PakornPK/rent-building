@@ -32,10 +32,18 @@ func (h *authHandler) Login(c *fiber.Ctx) error {
 }
 
 func (h *authHandler) Logout(c *fiber.Ctx) error {
-	// Implement logout logic here, e.g., invalidate the token
+	id := c.Locals("userID").(int)
+	if err := h.authService.Logout(id); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Logout failed: " + err.Error()})
+	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Logged out successfully"})
 }
 
 func (h *authHandler) RefreshToken(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{"error": "Refresh token not implemented"})
+	id := c.Locals("userID").(int)
+	token, err := h.authService.RefreshToken(id)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Refresh token failed: " + err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"token": token})
 }
