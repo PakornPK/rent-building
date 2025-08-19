@@ -6,6 +6,7 @@ import (
 	"github.com/PakornPK/rent-building/configs"
 	"github.com/PakornPK/rent-building/infra"
 	"github.com/PakornPK/rent-building/internal/handlers"
+	"github.com/PakornPK/rent-building/internal/middlewares"
 	"github.com/PakornPK/rent-building/internal/repositories"
 	"github.com/PakornPK/rent-building/internal/services"
 	"github.com/gofiber/fiber/v2"
@@ -36,20 +37,21 @@ func StartServer(conn *infra.ConnectionDB, cfg configs.Config) error {
 	repo := InitializeRepository(conn)
 	service := initializeService(repo, cfg)
 	handler := initializeHandlers(service)
-	initializedRouter(app, handler)
+	initializedRouter(app, handler, cfg)
 
 	log.Info("Starting server on port:", cfg.Server.Port)
 	return app.Listen(fmt.Sprintf(":%d", cfg.Server.Port))
 }
 
-func initializedRouter(app *fiber.App, handler *handler) {
+func initializedRouter(app *fiber.App, handler *handler, cfg configs.Config) {
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusOK)
 	})
 
 	app.Use(recover.New())
+	authMiddleware := middlewares.AuthMiddleware(&cfg.Auth)
 
-	user := app.Group("/users")
+	user := app.Group("/users").Use(authMiddleware)
 	userRouter(user, handler.user)
 	auth := app.Group("/auth")
 	authRouter(auth, handler.auth)
@@ -96,5 +98,5 @@ func userRouter(router fiber.Router, userHandler handlers.UserHandler) {
 func authRouter(router fiber.Router, authHandler handlers.AuthHandler) {
 	router.Post("/login", authHandler.Login)
 	router.Post("/logout", authHandler.Logout)
-	router.Post("/refresh-token", authHandler.RefreshToken)
+	router.Post("/refresh", authHandler.RefreshToken)
 }

@@ -12,7 +12,7 @@ import (
 type AuthService interface {
 	Login(input LoginInput) (*LoginOutput, error)
 	Logout(id int) error
-	RefreshToken(id int) (*LoginOutput, error)
+	RefreshToken(token string) (*LoginOutput, error)
 }
 
 type LoginInput struct {
@@ -125,7 +125,14 @@ func (s *authService) Logout(id int) error {
 	})
 }
 
-func (s *authService) RefreshToken(id int) (*LoginOutput, error) {
+func (s *authService) RefreshToken(token string) (*LoginOutput, error) {
+	privateKey := s.cfg.PrivateKey
+	publicKey := s.cfg.PublicKey
+
+	id, err := getUserIDFromToken(token, []byte(publicKey))
+	if err != nil {
+		return nil, err
+	}
 	user, err := s.userService.GetByID(id)
 	if err != nil {
 		return nil, err
@@ -134,7 +141,6 @@ func (s *authService) RefreshToken(id int) (*LoginOutput, error) {
 		return nil, errors.New("user not found")
 	}
 
-	privateKey := s.cfg.PrivateKey
 	accExpiresIn := time.Minute * time.Duration(s.cfg.ExpiresIn)
 	refExpiresIn := time.Minute * time.Duration(s.cfg.RefreshIn)
 
@@ -193,4 +199,44 @@ func (s *authService) RefreshToken(id int) (*LoginOutput, error) {
 		RefreshToken: refToken,
 		TokenType:    "Bearer",
 	}, nil
+}
+
+func parseTokenClaims(tokenString string, publicKeyPEM []byte) (map[string]interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+
+		key, err := jwt.ParseRSAPublicKeyFromPEM(publicKeyPEM)
+		if err != nil {
+			return nil, err
+		}
+		return key, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		return claims, nil
+	}
+
+	return nil, errors.New("invalid token claims")
+}
+
+func getUserIDFromToken(tokenString string, secretKey []byte) (int, error) {
+	claims, err := parseTokenClaims(tokenString, secretKey)
+	if err != nil {
+		return 0, err
+	}
+
+	if userID, ok := claims["sub"].(float64); ok {
+		return int(userID), nil
+	}
+	return 0, errors.New("user ID not found in token claims")
 }

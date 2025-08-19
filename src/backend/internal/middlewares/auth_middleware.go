@@ -22,7 +22,7 @@ func AuthMiddleware(cfg *configs.AuthConfig) fiber.Handler {
 		if tokenString == "" {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Token is missing"})
 		}
-		claims, err := parseTokenClaims(tokenString, []byte(cfg.PrivateKey))
+		claims, err := parseTokenClaims(tokenString, []byte(cfg.PublicKey))
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token: " + err.Error()})
 		}
@@ -46,20 +46,31 @@ func AuthMiddleware(cfg *configs.AuthConfig) fiber.Handler {
 	}
 }
 
-func parseTokenClaims(tokenString string, secretKey []byte) (map[string]interface{}, error) {
+func parseTokenClaims(tokenString string, publicKeyPEM []byte) (map[string]interface{}, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
-		return secretKey, nil
+
+		key, err := jwt.ParseRSAPublicKeyFromPEM(publicKeyPEM)
+		if err != nil {
+			return nil, err
+		}
+		return key, nil
 	})
-	if err != nil || !token.Valid {
+
+	if err != nil {
 		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, errors.New("invalid token")
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
 		return claims, nil
 	}
+
 	return nil, errors.New("invalid token claims")
 }
 
