@@ -54,7 +54,7 @@ func initializedRouter(app *fiber.App, handler *handler, cfg configs.Config) {
 	user := app.Group("/users").Use(authMiddleware)
 	userRouter(user, handler.user)
 	auth := app.Group("/auth")
-	authRouter(auth, handler.auth)
+	authRouter(auth, handler.auth, cfg.Auth)
 }
 
 func InitializeRepository(conn *infra.ConnectionDB) *repository {
@@ -95,8 +95,8 @@ func userRouter(router fiber.Router, userHandler handlers.UserHandler) {
 	router.Delete("/:id", userHandler.DeleteUser)
 }
 
-func authRouter(router fiber.Router, authHandler handlers.AuthHandler) {
+func authRouter(router fiber.Router, authHandler handlers.AuthHandler, cfg configs.AuthConfig) {
 	router.Post("/login", authHandler.Login)
-	router.Post("/logout", authHandler.Logout)
+	router.Post("/logout", middlewares.AuthMiddleware(&cfg), authHandler.Logout)
 	router.Post("/refresh", authHandler.RefreshToken)
 }
