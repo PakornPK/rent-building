@@ -40,14 +40,8 @@ func (h *authHandler) Logout(c *fiber.Ctx) error {
 }
 
 func (h *authHandler) RefreshToken(c *fiber.Ctx) error {
-	type refreshTokenInput struct {
-		RefreshToken string `json:"refresh_token"`
-	}
-	var input refreshTokenInput
-	if err := c.BodyParser(&input); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input: " + err.Error()})
-	}
-	token, err := h.authService.RefreshToken(input.RefreshToken)
+	refreshToken := c.Cookies("refresh_token")
+	token, err := h.authService.RefreshToken(refreshToken)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Refresh token failed: " + err.Error()})
 	}
