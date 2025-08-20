@@ -1,6 +1,9 @@
 // src/components/LoginPage.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+const API_URL = import.meta.env.VITE_API_URL;
+
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -23,24 +26,18 @@ const LoginPage = () => {
 
         try {
             // In a real application, you would send these credentials to your backend
-            // const response = await fetch('/api/login', {
-            //   method: 'POST',
-            //   headers: {
-            //     'Content-Type': 'application/json',
-            //   },
-            //   body: JSON.stringify({ email, password }),
-            // });
-
-            // const data = await response.json();
-
-            // Simulate network delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            // Simulate a successful login
-            if (email === 'user@example.com' && password === 'password123') {
-                console.log('Login successful!', { email, password });
-                // Redirect user or store token (e.g., localStorage.setItem('token', data.token))
-                navigate('/dashboard');
+            const response = await fetch(`${API_URL}/auth/login`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ email, password }),
+            });
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem("token_type", data.token_type)
+                localStorage.setItem("access_token", data.access_token)
+                navigate('/');
             } else {
                 setError('Invalid email or password.');
             }

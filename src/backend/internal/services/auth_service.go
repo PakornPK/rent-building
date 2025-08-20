@@ -10,9 +10,9 @@ import (
 )
 
 type AuthService interface {
-	Login(input LoginInput) (*LoginOutput, error)
+	Login(input LoginInput) (*LoginOutput, string, error)
 	Logout(id int) error
-	RefreshToken(token string) (*LoginOutput, error)
+	RefreshToken(token string) (*LoginOutput, string, error)
 }
 
 type LoginInput struct {
@@ -21,9 +21,8 @@ type LoginInput struct {
 }
 
 type LoginOutput struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	TokenType    string `json:"token_type"`
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
 }
 type authService struct {
 	userService UserService
@@ -37,14 +36,14 @@ func NewAuthService(userService UserService, cfg *configs.AuthConfig) AuthServic
 	}
 }
 
-func (s *authService) Login(input LoginInput) (*LoginOutput, error) {
+func (s *authService) Login(input LoginInput) (*LoginOutput, string, error) {
 	user, err := s.userService.GetByEmail(input.Email)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	if !utils.CheckPasswordHash(input.Password, user.Password) {
-		return nil, errors.New("invalid credentials")
+		return nil, "", errors.New("invalid credentials")
 	}
 
 	privateKey := s.cfg.PrivateKey
@@ -74,16 +73,16 @@ func (s *authService) Login(input LoginInput) (*LoginOutput, error) {
 	var parsedPrivateKey interface{}
 	parsedPrivateKey, err = jwt.ParseRSAPrivateKeyFromPEM([]byte(privateKey))
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	accToken, err := tokenAccObj.SignedString(parsedPrivateKey)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	refToken, err := tokenRefObj.SignedString(parsedPrivateKey)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	if user.LastLogin == nil || user.LastLogin.Before(time.Now().Add(-24*time.Hour)) {
 		now := time.Now()
@@ -97,15 +96,14 @@ func (s *authService) Login(input LoginInput) (*LoginOutput, error) {
 			RefreshToken:       refToken,
 			RefreshTokenExpiry: &refExp,
 		}); err != nil {
-			return nil, err
+			return nil, "", err
 		}
 	}
 
 	return &LoginOutput{
-		AccessToken:  accToken,
-		RefreshToken: refToken,
-		TokenType:    "Bearer",
-	}, nil
+		AccessToken: accToken,
+		TokenType:   "Bearer",
+	}, refToken, nil
 }
 
 func (s *authService) Logout(id int) error {
@@ -125,23 +123,23 @@ func (s *authService) Logout(id int) error {
 	})
 }
 
-func (s *authService) RefreshToken(token string) (*LoginOutput, error) {
+func (s *authService) RefreshToken(token string) (*LoginOutput, string, error) {
 	privateKey := s.cfg.PrivateKey
 	publicKey := s.cfg.PublicKey
 
 	id, err := getUserIDFromToken(token, []byte(publicKey))
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	user, err := s.userService.GetByID(id)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	if user == nil {
-		return nil, errors.New("user not found")
+		return nil, "", errors.New("user not found")
 	}
 	if user.AccessToken == "" || user.RefreshToken == "" {
-		return nil, errors.New("user logged out")
+		return nil, "", errors.New("user logged out")
 	}
 
 	accExpiresIn := time.Minute * time.Duration(s.cfg.ExpiresIn)
@@ -171,16 +169,16 @@ func (s *authService) RefreshToken(token string) (*LoginOutput, error) {
 	var parsedPrivateKey interface{}
 	parsedPrivateKey, err = jwt.ParseRSAPrivateKeyFromPEM([]byte(privateKey))
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	accToken, err := tokenAccObj.SignedString(parsedPrivateKey)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	refToken, err := tokenRefObj.SignedString(parsedPrivateKey)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	now := time.Now()
@@ -194,14 +192,13 @@ func (s *authService) RefreshToken(token string) (*LoginOutput, error) {
 		RefreshToken:       refToken,
 		RefreshTokenExpiry: &refExp,
 	}); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	return &LoginOutput{
-		AccessToken:  accToken,
-		RefreshToken: refToken,
-		TokenType:    "Bearer",
-	}, nil
+		AccessToken: accToken,
+		TokenType:   "Bearer",
+	}, refToken, nil
 }
 
 func parseTokenClaims(tokenString string, publicKeyPEM []byte) (map[string]interface{}, error) {

@@ -125,7 +125,7 @@ const Sidebar = () => {
             </li>
           </ul>
           <ul className='absolute bottom-0'>
-            <li li className='mb-4'>
+            <li className='mb-4'>
               <div className='flex items-center text-lg hover:text-blue-400'>
                 <ArrowLeftStartOnRectangleIcon className='h-5 w-5 mr-3' />
                 Logout

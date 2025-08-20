@@ -11,6 +11,7 @@ import (
 	"github.com/PakornPK/rent-building/internal/services"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
@@ -49,6 +50,11 @@ func initializedRouter(app *fiber.App, handler *handler, cfg configs.Config) {
 	})
 
 	app.Use(recover.New())
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost:5173",
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
+
 	authMiddleware := middlewares.AuthMiddleware(&cfg.Auth)
 
 	user := app.Group("/users").Use(authMiddleware)
