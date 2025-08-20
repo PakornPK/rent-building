@@ -140,6 +140,9 @@ func (s *authService) RefreshToken(token string) (*LoginOutput, error) {
 	if user == nil {
 		return nil, errors.New("user not found")
 	}
+	if user.AccessToken == "" || user.RefreshToken == "" {
+		return nil, errors.New("user logged out")
+	}
 
 	accExpiresIn := time.Minute * time.Duration(s.cfg.ExpiresIn)
 	refExpiresIn := time.Minute * time.Duration(s.cfg.RefreshIn)
