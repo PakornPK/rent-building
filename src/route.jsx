@@ -13,7 +13,7 @@ import Healthdesk from './pages/Healthdesk';
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Layout />, // กำหนดให้เส้นทางหลักใช้ Layout
+    element: <Layout />, 
     children: [
       {
         index: true,

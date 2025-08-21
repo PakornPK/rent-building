@@ -1,15 +1,32 @@
 // src/components/LoginPage.jsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
+import { jwtDecode } from "jwt-decode";
 
 const API_URL = import.meta.env.VITE_API_URL;
+
+function isTokenValid(token) {
+  try {
+    const { exp } = jwtDecode(token);
+    return Date.now() < exp * 1000;
+  } catch {
+    return false;
+  }
+}
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+    
+    const token = localStorage.getItem("access_token");
+    const valid = token && isTokenValid(token)
+    if (valid) {
+        return <Navigate to="/" replace />;
+    } else if (token && !valid) {
+        localStorage.removeItem("token");
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault(); // Prevent default form submission behavior
@@ -37,7 +54,7 @@ const LoginPage = () => {
                 const data = await response.json();
                 localStorage.setItem("token_type", data.token_type)
                 localStorage.setItem("access_token", data.access_token)
-                navigate('/');
+                return <Navigate to="/" replace />;
             } else {
                 setError('Invalid email or password.');
             }

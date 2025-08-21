@@ -10,8 +10,10 @@ import {
   ArrowLeftStartOnRectangleIcon
 } from '@heroicons/react/24/solid';
 import { NavLink } from 'react-router-dom'; // เปลี่ยนจาก 'react-router' เป็น 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -125,7 +127,10 @@ const Sidebar = () => {
             </li>
           </ul>
           <ul className='absolute bottom-0'>
-            <li className='mb-4'>
+            <li className='mb-4' onClick={() => {
+              localStorage.removeItem("access_token");
+              navigate("/login");
+            }}>
               <div className='flex items-center text-lg hover:text-blue-400'>
                 <ArrowLeftStartOnRectangleIcon className='h-5 w-5 mr-3' />
                 Logout
