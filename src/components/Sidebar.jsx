@@ -12,9 +12,25 @@ import {
 import { NavLink } from 'react-router-dom'; // เปลี่ยนจาก 'react-router' เป็น 'react-router-dom'
 import { useNavigate } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const Sidebar = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+
+  const logout = async () => {
+    const token = localStorage.getItem("access_token")
+    const tokenType = localStorage.getItem("token_type")
+    await fetch(`${API_URL}/auth/logout`, {
+      method: "POST",
+      headers: { 
+        "Authorization": `${tokenType} ${token}`
+      }
+    })
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("token_type");
+    navigate("/login");
+  }
 
   return (
     <>
@@ -127,10 +143,7 @@ const Sidebar = () => {
             </li>
           </ul>
           <ul className='absolute bottom-0'>
-            <li className='mb-4' onClick={() => {
-              localStorage.removeItem("access_token");
-              navigate("/login");
-            }}>
+            <li className='mb-4' onClick={ async () => await logout()}>
               <div className='flex items-center text-lg hover:text-blue-400'>
                 <ArrowLeftStartOnRectangleIcon className='h-5 w-5 mr-3' />
                 Logout
