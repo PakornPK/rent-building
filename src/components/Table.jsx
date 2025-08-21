@@ -1,6 +1,7 @@
 import { DocumentMagnifyingGlassIcon, TrashIcon } from '@heroicons/react/16/solid';
 import { PencilSquareIcon } from '@heroicons/react/16/solid';
 import React from 'react';
+import ToggleSwitch from './ToggleSwitch';
 
 const Table = ({ data, columns, pageSize, currentPage, onView, onEdit, onDelete }) => {
   const startIndex = (currentPage - 1) * pageSize;
@@ -34,7 +35,7 @@ const Table = ({ data, columns, pageSize, currentPage, onView, onEdit, onDelete 
               {columns.map((column, colIndex) => (
                 <td key={colIndex} className="px-6 py-4">
                   {/* เข้าถึงข้อมูลจาก key ที่เรากำหนดไว้ใน props 'accessor' */}
-                  {row[column.accessor]}
+                  {typeof row[column.accessor] === 'boolean'? (<ToggleSwitch swEnabled={row[column.accessor]} />): row[column.accessor].toString()}
                 </td>
               ))}
               {isAction && (

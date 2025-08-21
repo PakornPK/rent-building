@@ -29,11 +29,10 @@ const LoginPage = () => {
     }
 
     const handleSubmit = async (e) => {
-        e.preventDefault(); // Prevent default form submission behavior
-        setError(''); // Clear previous errors
-        setLoading(true); // Indicate loading state
+        e.preventDefault(); 
+        setError(''); 
+        setLoading(true); 
 
-        // Basic client-side validation
         if (!email || !password) {
             setError('Please enter both email and password.');
             setLoading(false);
@@ -42,8 +41,7 @@ const LoginPage = () => {
 
 
         try {
-            // In a real application, you would send these credentials to your backend
-            const response = await fetch(`${API_URL}/auth/login`, {
+            const response = await fetch(`${API_URL}/api/auth/login`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -62,7 +60,7 @@ const LoginPage = () => {
             console.error('Login error:', err);
             setError('An unexpected error occurred. Please try again.');
         } finally {
-            setLoading(false); // End loading state
+            setLoading(false); 
         }
     };
 

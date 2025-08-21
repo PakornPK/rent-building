@@ -1,30 +1,56 @@
-import { useState } from 'react';
+import { useState,useEffect,useRef } from 'react';
 import Table from '../components/Table';
 import Pagination from '../components/Pagination';
 import Button from '../components/Button'
 import Modal from '../components/Modal';
 import UploadFile from '../components/UploadFile';
 
-const DUMMY_DATA = Array.from({ length: 100 }, (_, i) => ({
-  id: i + 1,
-  name: `ผู้ใช้งานคนที่ ${i + 1}`,
-  email: `user${i + 1}@example.com`,
-  role: i % 2 === 0 ? 'Admin' : 'User',
-}));
-
 // กำหนด Columns สำหรับตาราง
-const COLUMNS = [
+const columns = [
   { header: 'ID', accessor: 'id' },
-  { header: 'ชื่อ', accessor: 'name' },
+  { header: 'ชื่อ', accessor: 'first_name' },
+  { header: 'นามสกุล', accessor: 'last_name' },
   { header: 'อีเมล', accessor: 'email' },
-  { header: 'บทบาท', accessor: 'role' },
+  { header: 'โทรศัพท์', accessor: 'phone' },
+  { header: 'active', accessor: 'is_active' },
+  { header: 'admin', accessor: 'is_admin' },
+  { header: 'เข้าระบบล่าสุด', accessor: 'last_login' },
 ];
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const pageSize = 10; // จำนวนข้อมูลต่อหน้า
 
 function User() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [users, setUsers] = useState([]);
+  const fetched = useRef(false);
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/users?page=${currentPage}&page_size=${pageSize}&sort=ASC`, {
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch users");
+      }
+      const data = await res.json();
+      setUsers(data?.data);    
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  useEffect(() => {
+    if (!fetched.current) {
+      fetched.current = true;
+      fetchUsers();
+    }
+  }, []);
+
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -48,8 +74,8 @@ function User() {
 
         {/* ส่ง props ทั้งหมดไปให้ Table */}
         <Table
-          data={DUMMY_DATA}
-          columns={COLUMNS}
+          data={users}
+          columns={columns}
           pageSize={pageSize}
           currentPage={currentPage}
           onView={(row) => console.log(row.id)}
@@ -59,7 +85,7 @@ function User() {
 
         {/* ส่ง props ทั้งหมดไปให้ Pagination */}
         <Pagination
-          totalItems={DUMMY_DATA.length}
+          totalItems={users.length}
           pageSize={pageSize}
           currentPage={currentPage}
           onPageChange={handlePageChange}

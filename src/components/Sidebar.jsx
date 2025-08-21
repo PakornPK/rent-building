@@ -21,7 +21,7 @@ const Sidebar = () => {
   const logout = async () => {
     const token = localStorage.getItem("access_token")
     const tokenType = localStorage.getItem("token_type")
-    await fetch(`${API_URL}/auth/logout`, {
+    await fetch(`${API_URL}/api/auth/logout`, {
       method: "POST",
       headers: { 
         "Authorization": `${tokenType} ${token}`

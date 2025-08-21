@@ -58,10 +58,10 @@ func initializedRouter(app *fiber.App, handler *handler, cfg configs.Config) {
 	}))
 
 	authMiddleware := middlewares.AuthMiddleware(&cfg.Auth)
-
-	user := app.Group("/users").Use(authMiddleware)
+	api := app.Group("api")
+	user := api.Group("/users").Use(authMiddleware)
 	userRouter(user, handler.user)
-	auth := app.Group("/auth")
+	auth := api.Group("/auth")
 	authRouter(auth, handler.auth, cfg.Auth)
 }
 

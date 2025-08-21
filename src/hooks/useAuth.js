@@ -28,7 +28,7 @@ export function useAuth() {
 
   const refreshToken = async () => {
     try {
-      const res = await fetch(`${API_URL}/auth/login`, {
+      const res = await fetch(`${API_URL}/api/auth/refresh`, {
         method: "POST",
         credentials: "include",
       });

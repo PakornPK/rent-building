@@ -84,9 +84,7 @@ func (h *userHandler) ListUsers(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to list users"})
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"data": users,
-	})
+	return c.Status(fiber.StatusOK).JSON(users)
 }
 
 func (h *userHandler) UpdateUserPassword(c *fiber.Ctx) error {
