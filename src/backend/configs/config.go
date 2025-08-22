@@ -9,10 +9,23 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	ProductionEnv string = "production"
+)
+
 type Config struct {
+	App      AppConfig      `mapstructure:",squash"`
 	Database DatabaseConfig `mapstructure:",squash"`
 	Server   ServerConfig   `mapstructure:",squash"`
 	Auth     AuthConfig     `mapstructure:",squash"`
+}
+
+type AppConfig struct {
+	AppEnv string `mapstructure:"APP_ENV"`
+}
+
+func (a *AppConfig) IsProduction() bool {
+	return a.AppEnv == ProductionEnv
 }
 
 type ServerConfig struct {

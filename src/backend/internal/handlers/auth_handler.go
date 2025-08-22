@@ -6,6 +6,7 @@ import (
 )
 
 type AuthHandler interface {
+	SetSecure(secure bool) AuthHandler
 	Login(c *fiber.Ctx) error
 	Logout(c *fiber.Ctx) error
 	RefreshToken(c *fiber.Ctx) error
@@ -13,10 +14,19 @@ type AuthHandler interface {
 
 type authHandler struct {
 	authService services.AuthService
+	Secure      bool
 }
 
 func NewAuthHandler(authService services.AuthService) AuthHandler {
-	return &authHandler{authService: authService}
+	return &authHandler{
+		authService: authService,
+		Secure:      true,
+	}
+}
+
+func (h *authHandler) SetSecure(secure bool) AuthHandler {
+	h.Secure = secure
+	return h
 }
 
 func (h *authHandler) Login(c *fiber.Ctx) error {
@@ -28,12 +38,16 @@ func (h *authHandler) Login(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Login failed: " + err.Error()})
 	}
+	sameSite := "lax"
+	if h.Secure {
+		sameSite = "none"
+	}
 	c.Cookie(&fiber.Cookie{
 		Name:     "refresh_token",
 		Value:    refToken,
-		Secure:   true,
+		Secure:   h.Secure,
 		HTTPOnly: true,
-		SameSite: "Lax",
+		SameSite: sameSite,
 		Path:     "/",
 	})
 	return c.Status(fiber.StatusOK).JSON(token)

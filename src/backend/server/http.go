@@ -37,7 +37,7 @@ func StartServer(conn *infra.ConnectionDB, cfg configs.Config) error {
 
 	repo := InitializeRepository(conn)
 	service := initializeService(repo, cfg)
-	handler := initializeHandlers(service)
+	handler := initializeHandlers(service, cfg)
 	initializedRouter(app, handler, cfg)
 
 	log.Info("Starting server on port:", cfg.Server.Port)
@@ -83,10 +83,10 @@ func initializeService(repo *repository, cfg configs.Config) *server {
 	}
 }
 
-func initializeHandlers(service *server) *handler {
+func initializeHandlers(service *server, cfg configs.Config) *handler {
 	// Initialize user handler
 	userHandler := handlers.NewUserHandler(service.user)
-	authHandler := handlers.NewAuthHandler(service.auth)
+	authHandler := handlers.NewAuthHandler(service.auth).SetSecure(cfg.App.IsProduction())
 
 	return &handler{
 		auth: authHandler,

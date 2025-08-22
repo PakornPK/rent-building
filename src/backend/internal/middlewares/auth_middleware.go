@@ -27,7 +27,7 @@ func AuthMiddleware(cfg *configs.AuthConfig) fiber.Handler {
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token: " + err.Error()})
 		}
-		
+
 		if exp, ok := claims["exp"].(float64); !ok || int64(exp) <= time.Now().Unix() {
 			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "token expired"})
 		}
