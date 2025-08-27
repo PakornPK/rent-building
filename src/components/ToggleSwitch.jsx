@@ -11,7 +11,7 @@ function ToggleSwitch({swEnabled, handleToggle}) {
       >
         <div
           className={`bg-white w-3 h-3 rounded-full shadow-md transform transition-transform duration-300 ${
-            swEnabled ? "translate-x-6" : "translate-x-0"
+            swEnabled ? "translate-x-6" : "translate-x-1"
           }`}
         ></div>
       </button>
