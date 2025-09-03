@@ -26,6 +26,7 @@ function User() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [user, setUser] = useState({})
   const [users, setUsers] = useState([]);
   const fetched = useRef(false);
@@ -62,6 +63,10 @@ function User() {
     setUser(row)
     setIsEditModalOpen(true)
   }
+  const confirmDelete = (row) => {
+    setUser(row)
+    setIsConfirmOpen(true)
+  }
 
   const updateUser = async (user) => {
     try {
@@ -85,6 +90,26 @@ function User() {
         throw new Error("Failed to fetch users");
       }
       setIsEditModalOpen(false);
+      fetchUsers();
+    } catch (err) {
+      // setError(err.message);
+    }
+  }
+
+  const deleteUser = async (user) => {
+    try {
+      const res = await fetch(`${API_URL}/api/users/${user?.id}`, {
+        method: "DELETE",
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch users");
+      }
+      setIsConfirmOpen(false);
       fetchUsers();
     } catch (err) {
       // setError(err.message);
@@ -115,7 +140,7 @@ function User() {
           pageSize={pageSize}
           currentPage={currentPage}
           onEdit={(row) => viewDetail(row)}
-          onDelete={(row) => console.log(row.id)}
+          onDelete={(row) => confirmDelete(row)}
         />
 
         {/* ส่ง props ทั้งหมดไปให้ Pagination */}
@@ -218,20 +243,20 @@ function User() {
               <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Admin</label>
               <ToggleSwitch
                 swEnabled={user?.is_admin}
-                handleToggle={() => {
-                  if (!user) return
-                  setUser(prev => ({ ...prev, is_admin: !prev.is_admin }))
-                }}
+                // handleToggle={() => {
+                //   if (!user) return
+                //   setUser(prev => ({ ...prev, is_admin: !prev.is_admin }))
+                // }}
               />
             </div>
             <div>
               <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Active</label>
               <ToggleSwitch
                 swEnabled={user?.is_active}
-                handleToggle={() => {
-                  if (!user) return
-                  setUser(prev => ({ ...prev, is_active: !prev.is_active }))
-                }}
+                // handleToggle={() => {
+                //   if (!user) return
+                //   setUser(prev => ({ ...prev, is_active: !prev.is_active }))
+                // }}
               />
             </div>
           </div>
@@ -256,6 +281,28 @@ function User() {
             <Button
               className={"w-35 bg-rose-600 hover:bg-rose-700"}
               onClick={() => setIsEditModalOpen(false)}
+            >
+              Close
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {isConfirmOpen && (
+        <Modal className="max-w-xs">
+          <div>
+            <div className='text-xl p-4 text-center'>Confirm delete?</div>
+          </div>
+          <div className='flex justify-center gap-3'>
+            <Button
+              className={"w-25 bg-rose-600 hover:bg-rose-700"}
+              onClick={async () => await deleteUser(user)}
+            >
+              Delete
+            </Button>
+            <Button
+              className={"w-25"}
+              onClick={() => setIsConfirmOpen(false)}
             >
               Close
             </Button>
