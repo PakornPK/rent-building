@@ -35,7 +35,7 @@ const Table = ({ data, columns, pageSize, currentPage, onView, onEdit, onDelete 
               {columns.map((column, colIndex) => (
                 <td key={colIndex} className="px-6 py-4">
                   {/* เข้าถึงข้อมูลจาก key ที่เรากำหนดไว้ใน props 'accessor' */}
-                  {typeof row[column.accessor] === 'boolean'? (<ToggleSwitch swEnabled={row[column.accessor]} />): row[column.accessor].toString()}
+                  {typeof row[column.accessor] === 'boolean'? (<ToggleSwitch swEnabled={row[column.accessor]} />): row[column.accessor]}
                 </td>
               ))}
               {isAction && (
