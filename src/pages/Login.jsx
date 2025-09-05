@@ -1,6 +1,6 @@
 // src/components/LoginPage.jsx
 import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate, NavLink } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -125,6 +125,13 @@ const LoginPage = () => {
                         </button>
                     </div>
                 </form>
+                <div className='flex justify-end p-4 mt-2'>
+                    <NavLink
+                        to="/change-password"
+                    >
+                        <p className='underline hover:text-blue-400'>เปลี่ยนรหัสผ่าน</p>
+                    </NavLink>
+                </div>
             </div>
         </div>
     );

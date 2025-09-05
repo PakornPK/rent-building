@@ -9,6 +9,7 @@ import RenterManagement from './pages/RenterManagement';
 import RentalView from './pages/RentalView';
 import UtilitiesCost from './pages/UtilitiesCost';
 import Healthdesk from './pages/Healthdesk';
+import ChangePassword from './pages/ChangePassword';
 
 const router = createBrowserRouter([
   {
@@ -52,6 +53,10 @@ const router = createBrowserRouter([
   {
     path: 'login',
     element: <Login />,
+  },
+  {
+    path: 'change-password',
+    element: <ChangePassword />,
   },
   {
     path: "*", // fallback
