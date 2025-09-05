@@ -63,9 +63,13 @@ func (h *userHandler) UpdateUser(c *fiber.Ctx) error {
 }
 
 func (h *userHandler) DeleteUser(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(int)
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
+	}
+	if userID == id {
+		return c.SendStatus(fiber.StatusBadRequest)
 	}
 	if err := h.userServ.Delete(id); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to delete user"})

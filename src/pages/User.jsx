@@ -116,11 +116,12 @@ function User() {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to fetch users");
+        throw new Error("Failed to deleteUser users");
       }
       setIsConfirmOpen(false);
       fetchUsers();
     } catch (err) {
+      setIsConfirmOpen(false);
       // setError(err.message);
     }
   }
