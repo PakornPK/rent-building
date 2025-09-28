@@ -16,13 +16,15 @@ import (
 )
 
 type handler struct {
-	auth handlers.AuthHandler
-	user handlers.UserHandler
+	auth   handlers.AuthHandler
+	user   handlers.UserHandler
+	rental handlers.RentalsHandler
 }
 
 type server struct {
-	auth services.AuthService
-	user services.UserService
+	auth   services.AuthService
+	user   services.UserService
+	rental services.RentalService
 }
 
 type repository struct {
@@ -63,6 +65,8 @@ func initializedRouter(app *fiber.App, handler *handler, cfg configs.Config) {
 	userRouter(user, handler.user)
 	auth := api.Group("/auth")
 	authRouter(auth, handler.auth, cfg.Auth)
+	rental := api.Group("/rentals").Use(authMiddleware)
+	rentalRouter(rental, handler.rental)
 }
 
 func InitializeRepository(conn *infra.ConnectionDB) *repository {
@@ -107,4 +111,12 @@ func authRouter(router fiber.Router, authHandler handlers.AuthHandler, cfg confi
 	router.Post("/login", authHandler.Login)
 	router.Post("/logout", middlewares.AuthMiddleware(&cfg), authHandler.Logout)
 	router.Post("/refresh", authHandler.RefreshToken)
+}
+
+func rentalRouter(router fiber.Router, rentalHandler handlers.RentalsHandler) {
+	router.Get("/", rentalHandler.ListRentals)
+	router.Post("/", rentalHandler.CreateRental)
+	router.Get("/:id", rentalHandler.GetRental)
+	router.Put("/:id", rentalHandler.UpdateRental)
+	router.Delete("/:id", rentalHandler.DeleteRental)
 }
