@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from "react-router-dom";
 import Button from '../components/Button'
 import Modal from '../components/Modal';
 import UploadFile from '../components/UploadFile';
 import Table from '../components/Table';
 import Pagination from '../components/Pagination';
+import { DocumentArrowUpIcon } from '@heroicons/react/24/outline';
 
 const COLUMNS = [
     { header: 'ID', accessor: 'id' },
@@ -132,12 +133,121 @@ const DATA = [
 
 const pageSize = 10;
 
+const mockType = [
+    {
+        id: 1,
+        name: "งานบริการ",
+    },
+    {
+        id: 2,
+        name: "เฟอร์นิเจอร์",
+    },
+    {
+        id: 3,
+        name: "ลานจอดรถ",
+    },
+    {
+        id: 4,
+        name: "น้ำประปา",
+    },
+    {
+        id: 5,
+        name: "ไฟฟ้า",
+    },
+    {
+        id: 6,
+        name: "ห้องเช่า",
+    },
+]
+
+const mockCategory = [
+    {
+        id: 1,
+        name: "งานบริการ",
+    },
+    {
+        id: 2,
+        name: "เฟอร์นิเจอร์",
+    },
+    {
+        id: 3,
+        name: "ลานจอดรถ",
+    },
+    {
+        id: 4,
+        name: "น้ำประปา",
+    },
+    {
+        id: 5,
+        name: "ไฟฟ้า",
+    },
+    {
+        id: 6,
+        name: "ห้องเช่า",
+    },
+]
+
+const mockGroup = [
+    {
+        id: 1,
+        name: "งานบริการ",
+    },
+    {
+        id: 2,
+        name: "เฟอร์นิเจอร์",
+    },
+    {
+        id: 3,
+        name: "ลานจอดรถ",
+    },
+    {
+        id: 4,
+        name: "น้ำประปา",
+    },
+    {
+        id: 5,
+        name: "ไฟฟ้า",
+    },
+    {
+        id: 6,
+        name: "ห้องเช่า",
+    },
+]
+
 function RentalManagement() {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isModalFileUploadOpen, setIsModalFileUploadOpen] = useState(false);
+    const [isCategoryEnabled, setIsCategoryEnabled] = useState(false);
+    const [isGroupEnabled, setIsGroupEnabled] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [types, setTypes] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [groups, setGroups] = useState([]);
+    const [rental, setRental] = useState({})
     const navigate = useNavigate();
     const handlePageChange = (page) => {
         setCurrentPage(page);
+    };
+
+    useEffect(() => {
+        setTypes(mockType);
+    }, []);
+
+    useEffect(() => {
+        if (isCategoryEnabled) {
+            setCategories(mockCategory);
+            setIsGroupEnabled(true);
+        }
+    }, [isCategoryEnabled]);
+
+    useEffect(() => {
+        if (isGroupEnabled) {
+            setGroups(mockGroup);
+        }
+    }, [isGroupEnabled]);
+
+    const handleTypeChange = (e) => {
+        setIsCategoryEnabled(true); 
     };
     return (
         <div className='p-3'>
@@ -147,9 +257,21 @@ function RentalManagement() {
                     <div className='flex justify-end pb-3 pt-4'>
                         <Button
                             className="ml-3"
-                            onClick={() => setIsModalOpen(true)}
+                            onClick={() => setIsModalFileUploadOpen(true)}
                         >
-                            เพิ่มรายการ
+                            <div className="flex items-center">
+                                <DocumentArrowUpIcon className="w-5 h-5 mr-2" />
+                                เพิ่มรายการด้วยไฟล์
+                            </div>
+                        </Button>
+                        <Button
+                            className="ml-3"
+                            onClick={() => setIsCreateModalOpen(true)}
+                        >
+                            <div className="flex items-center">
+                                <DocumentArrowUpIcon className="w-5 h-5 mr-2" />
+                                เพิ่มรายการ
+                            </div>
                         </Button>
                     </div>
                 </div>
@@ -175,7 +297,124 @@ function RentalManagement() {
                 />
             </div>
 
-            {isModalOpen && (
+            {isCreateModalOpen && (
+                <Modal className="max-w-4xl">
+                <div className='flex flex-col gap-3'>
+                    <div className='text-2xl p-4 text-center'>เพิ่มรายการ</div>
+                    <div class="grid gap-6 mb-6 md:grid-cols-2">
+                        <div>
+                            <label for="type" class="block text-sm/6 font-medium text-gray-900">เลือกประเภท</label>
+                            <select 
+                                id="type" 
+                                className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2'
+                                onChange={handleTypeChange}
+                            >
+                                <option value="" disabled selected hidden>เลือกประเภท</option>
+                                {types.map((item) => (
+                                    <option key={item.id} value={item.id}>{item.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="category" class="block text-sm/6 font-medium text-gray-900">เลือกหมวดหมู่</label>
+                            <select 
+                                id="category" 
+                                className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2 disabled:opacity-50'
+                                disabled={!isCategoryEnabled}
+                                onChange={(e) => fetchGroups(e.target.value)}
+                            >
+                                <option value="" disabled selected hidden>เลือกหมวดหมู่</option>
+                                {categories.map((item) => (
+                                    <option key={item.id} value={item.id}>{item.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="group" class="block text-sm/6 font-medium text-gray-900">เลือกกลุ่ม</label>
+                            <select 
+                                id="group" 
+                                className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2 disabled:opacity-50'
+                                disabled={!isGroupEnabled}
+                                onChange={(e) => setRental(prev => ({ ...prev, group_id: parseInt(e.target.value) }))}
+                            >
+                                <option value="" disabled selected hidden>เลือกกลุ่ม</option>
+                                {groups.map((item) => (
+                                    <option key={item.id} value={item.id}>{item.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div> 
+                            <label for="name" class="block text-sm/6 font-medium text-gray-900">ชื่อรายการ</label>    
+                            <input 
+                                type="text" 
+                                id="name" 
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
+                                placeholder="ชื่อรายการ"
+                                onChange={(e) => setRental(prev => ({ ...prev, name: e.target.value }))}
+                            />
+                        </div>
+                        <div> 
+                            <label for="price" class="block text-sm/6 font-medium text-gray-900">ราคา</label>    
+                            <input 
+                                type="number" 
+                                step="0.01" 
+                                id="price" 
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
+                                placeholder="ราคา"
+                                onChange={(e) => setRental(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
+                            />
+                        </div>
+                        <div> 
+                            <label for="unit" class="block text-sm/6 font-medium text-gray-900">หน่วย</label>    
+                            <input 
+                                type="text" 
+                                id="unit" 
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
+                                placeholder="ต่อเดือน, ต่อปี"
+                                onChange={(e) => setRental(prev => ({ ...prev, unit: e.target.value }))}
+                            />
+                        </div>
+                        <div> 
+                            <label for="status" class="block text-sm/6 font-medium text-gray-900">หน่วย</label>    
+                            <select 
+                                id="status" 
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
+                                onChange={(e) => setRental(prev => ({ ...prev, status: e.target.value }))}
+                            >
+                                <option value="ACTIVE">ACTIVE</option>
+                                <option value="INACTIVE">INACTIVE</option>
+                            </select>
+                        </div>
+                        <div> 
+                            <label for="description" class="block text-sm/6 font-medium text-gray-900">รายละเอียด</label>    
+                            <input 
+                                type="text" 
+                                id="description" 
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
+                                placeholder="รายละเอียด"
+                                onChange={(e) => setRental(prev => ({ ...prev, name: e.target.value }))}
+                            />
+                        </div>
+                    </div>
+                    <div className='flex justify-end gap-3'> 
+                        <Button
+                            className="w-40"
+                            onClick={() => setIsCreateModalOpen(false)}
+                        >
+                            Submit
+                        </Button>
+                        <Button
+                            className="w-40 bg-rose-600 hover:bg-rose-700"
+                            onClick={() => setIsCreateModalOpen(false)}
+                        >
+                            Close
+                        </Button>
+                    </div>
+                </div>
+                </Modal>
+            )}
+
+            {isModalFileUploadOpen && (
                 <Modal className="max-w-4xl">
                     <div className='flex flex-col gap-3'>
                         <div className='text-2xl p-4 text-center'>เพิ่มรายการ</div>
@@ -196,13 +435,13 @@ function RentalManagement() {
                         <div className='flex justify-end gap-3'>
                             <Button
                                 className={"w-20"}
-                                onClick={() => setIsModalOpen(false)}
+                                onClick={() => setIsModalFileUploadOpen(false)}
                             >
                                 Submit
                             </Button>
                             <Button
                                 className={"w-20 bg-rose-600 hover:bg-rose-700"}
-                                onClick={() => setIsModalOpen(false)}
+                                onClick={() => setIsModalFileUploadOpen(false)}
                             >
                                 Close
                             </Button>

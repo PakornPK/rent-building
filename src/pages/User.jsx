@@ -195,20 +195,6 @@ function User() {
         <Modal className="max-w-4xl">
           <div className='flex flex-col gap-3'>
             <div className='text-2xl p-4 text-center'>เพิ่มผู้ใช้งาน</div>
-            {/* <div className='flex bg-neutral-200 p-3 gap-3 rounded-lg'>
-              <div className='flex-1 border-r-1'>
-                <label>Upload File (*.csv)</label>
-                <div className='pr-3 pt-3'>
-                  <UploadFile />
-                </div>
-              </div>
-              <div className='flex-1'>
-                <label>Download Example File</label>
-                <div className='text-center pt-2'>
-                  <Button>Download</Button>
-                </div>
-              </div>
-            </div> */}
             <div class="grid gap-6 mb-6 md:grid-cols-2">
             <div>
               <label for="first_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">First name</label>
