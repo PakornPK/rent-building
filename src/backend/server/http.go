@@ -91,10 +91,11 @@ func initializeHandlers(service *server, cfg configs.Config) *handler {
 	// Initialize user handler
 	userHandler := handlers.NewUserHandler(service.user)
 	authHandler := handlers.NewAuthHandler(service.auth).SetSecure(cfg.App.IsProduction())
-
+	rentalHandler := handlers.NewRentalsHandler(service.rental)
 	return &handler{
-		auth: authHandler,
-		user: userHandler,
+		auth:   authHandler,
+		user:   userHandler,
+		rental: rentalHandler,
 	}
 }
 
