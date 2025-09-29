@@ -29,6 +29,7 @@ func (h *authHandler) SetSecure(secure bool) AuthHandler {
 	return h
 }
 
+// TODO: ADD REDIS CACHE
 func (h *authHandler) Login(c *fiber.Ctx) error {
 	var loginInput services.LoginInput
 	if err := c.BodyParser(&loginInput); err != nil {
