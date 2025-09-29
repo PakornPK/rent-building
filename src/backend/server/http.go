@@ -5,6 +5,7 @@ import (
 
 	"github.com/PakornPK/rent-building/configs"
 	"github.com/PakornPK/rent-building/infra"
+	"github.com/PakornPK/rent-building/internal/entities"
 	"github.com/PakornPK/rent-building/internal/handlers"
 	"github.com/PakornPK/rent-building/internal/middlewares"
 	"github.com/PakornPK/rent-building/internal/repositories"
@@ -16,19 +17,25 @@ import (
 )
 
 type handler struct {
-	auth   handlers.AuthHandler
-	user   handlers.UserHandler
-	rental handlers.RentalsHandler
+	auth       handlers.AuthHandler
+	user       handlers.UserHandler
+	rental     handlers.RentalsHandler
+	masterData handlers.MasterDataHandler
 }
 
 type server struct {
-	auth   services.AuthService
-	user   services.UserService
-	rental services.RentalService
+	auth       services.AuthService
+	user       services.UserService
+	rental     services.RentalService
+	masterData services.MasterDataService
 }
 
 type repository struct {
-	user repositories.UserRepository
+	user           repositories.UserRepository
+	masterType     repositories.MasterDataRepository[entities.Type]
+	masterCategory repositories.MasterDataRepository[entities.Category]
+	masterGroup    repositories.MasterDataRepository[entities.Group]
+	product        repositories.ProductRepository
 }
 
 func StartServer(conn *infra.ConnectionDB, cfg configs.Config) error {
@@ -67,23 +74,35 @@ func initializedRouter(app *fiber.App, handler *handler, cfg configs.Config) {
 	authRouter(auth, handler.auth, cfg.Auth)
 	rental := api.Group("/rentals").Use(authMiddleware)
 	rentalRouter(rental, handler.rental)
+	masterData := api.Group("/master-data").Use(authMiddleware)
+	masterDataRouter(masterData, handler.masterData)
 }
 
 func InitializeRepository(conn *infra.ConnectionDB) *repository {
 	userRepo := repositories.NewUserRepository(conn)
-
+	masterTypeRepo := repositories.NewMasterDataRepository[entities.Type](conn)
+	masterCategoryRepo := repositories.NewMasterDataRepository[entities.Category](conn)
+	masterGroupRepo := repositories.NewMasterDataRepository[entities.Group](conn)
+	productRepo := repositories.NewProductRepository(conn)
 	return &repository{
-		user: userRepo,
+		user:           userRepo,
+		masterType:     masterTypeRepo,
+		masterCategory: masterCategoryRepo,
+		masterGroup:    masterGroupRepo,
+		product:        productRepo,
 	}
 }
 
 func initializeService(repo *repository, cfg configs.Config) *server {
 	userService := services.NewUserService(repo.user)
 	authService := services.NewAuthService(userService, &cfg.Auth)
-
+	rentalService := services.NewRentalService(repo.product)
+	masterDataService := services.NewMasterDataService(repo.masterType, repo.masterCategory, repo.masterGroup)
 	return &server{
-		auth: authService,
-		user: userService,
+		auth:       authService,
+		user:       userService,
+		rental:     rentalService,
+		masterData: masterDataService,
 	}
 }
 
@@ -92,10 +111,12 @@ func initializeHandlers(service *server, cfg configs.Config) *handler {
 	userHandler := handlers.NewUserHandler(service.user)
 	authHandler := handlers.NewAuthHandler(service.auth).SetSecure(cfg.App.IsProduction())
 	rentalHandler := handlers.NewRentalsHandler(service.rental)
+	masterDataHandler := handlers.NewMasterDataHandler(service.masterData)
 	return &handler{
-		auth:   authHandler,
-		user:   userHandler,
-		rental: rentalHandler,
+		auth:       authHandler,
+		user:       userHandler,
+		rental:     rentalHandler,
+		masterData: masterDataHandler,
 	}
 }
 
@@ -120,4 +141,8 @@ func rentalRouter(router fiber.Router, rentalHandler handlers.RentalsHandler) {
 	router.Get("/:id", rentalHandler.GetRental)
 	router.Put("/:id", rentalHandler.UpdateRental)
 	router.Delete("/:id", rentalHandler.DeleteRental)
+}
+
+func masterDataRouter(router fiber.Router, masterDataHandler handlers.MasterDataHandler) {
+	router.Get("/dropdown", masterDataHandler.Dropdown)
 }
