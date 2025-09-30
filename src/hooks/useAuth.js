@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import authProxy from "../proxy/authProxy";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -43,6 +44,7 @@ export function useAuth() {
   };
 
   const logout = () => {
+    authProxy.logout();
     localStorage.removeItem("access_token");
     localStorage.removeItem("token_type");
     navigate("/login");
