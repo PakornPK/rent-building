@@ -7,13 +7,16 @@ import (
 	"github.com/PakornPK/rent-building/internal/repositories"
 )
 
+// MasterDataInput is the input for master data service
+// Key is target master data (type, category, group)
+// Value is the foreign key id to filter (TypeID for category, CategoryID for group)
 type MasterDataInput struct {
 	Key   string `json:"key"`
 	Value int    `json:"value,omitempty"`
 }
 
 type MasterDataOutput struct {
-	ID   int `json:"id"`
+	ID   int    `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -33,7 +36,7 @@ func NewMasterDataService(typeRepo repositories.MasterDataRepository[entities.Ty
 
 // TODO: IF MASTER DATA IS LARGE SCALE THEN OPTIMIZE THIS CODE
 func (s *masterDataService) Dropdown(input MasterDataInput) ([]MasterDataOutput, error) {
-	var result []MasterDataOutput
+	result := make([]MasterDataOutput, 0)
 	switch input.Key {
 	case "type":
 		t, err := s.typeRepo.FindAll()
@@ -53,7 +56,7 @@ func (s *masterDataService) Dropdown(input MasterDataInput) ([]MasterDataOutput,
 			return nil, err
 		}
 		for _, v := range c {
-			if v.TypeID != input.Value {
+			if v.TypeID != input.Value && input.Value != 0 {
 				continue
 			}
 			result = append(result, MasterDataOutput{
@@ -68,7 +71,7 @@ func (s *masterDataService) Dropdown(input MasterDataInput) ([]MasterDataOutput,
 			return nil, err
 		}
 		for _, v := range g {
-			if v.CategoryID != input.Value {
+			if v.CategoryID != input.Value && input.Value != 0 {
 				continue
 			}
 			result = append(result, MasterDataOutput{

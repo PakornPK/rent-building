@@ -23,9 +23,6 @@ func (h *masterDataHandler) Dropdown(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 	value := c.QueryInt("value", 0)
-	if value == 0 {
-		return c.SendStatus(fiber.StatusBadRequest)
-	}
 	result, err := h.masterDataService.Dropdown(services.MasterDataInput{
 		Key:   key,
 		Value: value,

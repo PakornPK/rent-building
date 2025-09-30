@@ -8,6 +8,6 @@ type Category struct {
 	Name        string    `json:"name" gorm:"not null;unique"`
 	Description string    `json:"description"`
 	Type        *Type     `json:"type,omitempty" gorm:"foreignKey:TypeID"`
-	Group       []Group   `json:"group,omitempty" gorm:"foreignKey:GroupID"`
+	Group       []Group   `json:"group,omitempty" gorm:"foreignKey:CategoryID"`
 	CreatedAt   time.Time `json:"created_at"`
 }
