@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from "react-router-dom";
 import Button from '../components/Button'
 import Modal from '../components/Modal';
@@ -6,6 +6,7 @@ import UploadFile from '../components/UploadFile';
 import Table from '../components/Table';
 import Pagination from '../components/Pagination';
 import { DocumentArrowUpIcon } from '@heroicons/react/24/outline';
+import masterDataProxy from '../proxy/masterDataProxy';
 
 const COLUMNS = [
     { header: 'ID', accessor: 'id' },
@@ -221,6 +222,9 @@ function RentalManagement() {
     const [isGroupEnabled, setIsGroupEnabled] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [types, setTypes] = useState([]);
+    const [typeSelected, setTypeSelected] = useState({id:0, name:"เลือกประเภท"});
+    const [categorySelected, setCategorySelected] = useState({id:0, name:"เลือกหมวดหมู่"});
+    const [groupSelected, setGroupSelected] = useState({id:0, name:"เลือกกลุ่ม"});
     const [categories, setCategories] = useState([]);
     const [groups, setGroups] = useState([]);
     const [rental, setRental] = useState({})
@@ -229,25 +233,88 @@ function RentalManagement() {
         setCurrentPage(page);
     };
 
-    useEffect(() => {
-        setTypes(mockType);
+    const fetchTypes = useCallback(async () => {
+        const res = await masterDataProxy.getMasterData('type');
+        if (res?.ok) {
+            const data = await res.json();
+            setTypes(data);
+        }
     }, []);
+
+    const fetchCategories = useCallback(async () => {
+        const res = await masterDataProxy.getMasterData('category', typeSelected.id);
+        if (res?.ok) {
+            const data = await res.json();
+            setCategories(data);
+        }
+    }, [typeSelected]);
+
+    const fetchGroups = useCallback(async () => {
+        const res = await masterDataProxy.getMasterData('group', categorySelected.id);
+        if (res?.ok) {
+            const data = await res.json();
+            setGroups(data);
+        }
+    }, [categorySelected]);
+    
+    useEffect(() => {
+        fetchTypes();
+    }, [fetchTypes]);
 
     useEffect(() => {
         if (isCategoryEnabled) {
-            setCategories(mockCategory);
-            setIsGroupEnabled(true);
+            fetchCategories();
         }
-    }, [isCategoryEnabled]);
+
+    }, [isCategoryEnabled, fetchCategories]);
 
     useEffect(() => {
         if (isGroupEnabled) {
-            setGroups(mockGroup);
+            fetchGroups();
         }
-    }, [isGroupEnabled]);
+    }, [isGroupEnabled, fetchGroups]);
 
+    useEffect(() => {
+        if (categories.length === 1) {
+          setCategorySelected({ id: categories[0].id, name: categories[0].name });
+          setIsGroupEnabled(true);
+        }
+    }, [categories]);
+    
+    useEffect(() => {
+        if (groups.length === 1) {
+            setGroupSelected({ id: groups[0].id, name: groups[0].name });
+        }
+    }, [groups]);
+
+    const reset = (e) => {
+        setIsGroupEnabled(false);
+        setIsCategoryEnabled(false);
+        setIsCreateModalOpen(false);
+        setTypeSelected({id:0, name:"เลือกประเภท"});
+        setCategorySelected({id:0, name:"เลือกหมวดหมู่"});
+        setGroupSelected({id:0, name:"เลือกกลุ่ม"});
+        setRental({});
+    };
     const handleTypeChange = (e) => {
-        setIsCategoryEnabled(true); 
+        const { value, options, selectedIndex } = e.target;
+        setTypeSelected({ id: parseInt(value), name: options[selectedIndex].text });
+        setIsCategoryEnabled(true);
+        setIsGroupEnabled(false);
+      };
+    const handleCategoryChange = (e) => {
+        setCategorySelected({id:e.target.value, name:e.target.text});
+        setIsGroupEnabled(true);
+
+    };
+
+    const handleGroupChange = (e) => {
+        setGroupSelected({id:e.target.value, name:e.target.text});
+    };
+
+    const handleSubmitCreate = async () => {
+        console.log(groupSelected);
+        reset();
     };
     return (
         <div className='p-3'>
@@ -301,84 +368,87 @@ function RentalManagement() {
                 <Modal className="max-w-4xl">
                 <div className='flex flex-col gap-3'>
                     <div className='text-2xl p-4 text-center'>เพิ่มรายการ</div>
-                    <div class="grid gap-6 mb-6 md:grid-cols-2">
+                    <div className="grid gap-6 mb-6 md:grid-cols-2">
                         <div>
-                            <label for="type" class="block text-sm/6 font-medium text-gray-900">เลือกประเภท</label>
-                            <select 
-                                id="type" 
-                                className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2'
+                            <label className="block text-sm/6 font-medium text-gray-900">เลือกประเภท</label>
+                            <select
+                                id="type"
+                                value={typeSelected.id || ""}
                                 onChange={handleTypeChange}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
                             >
-                                <option value="" disabled selected hidden>เลือกประเภท</option>
+                                <option value="" disabled hidden>เลือกประเภท</option>
                                 {types.map((item) => (
                                     <option key={item.id} value={item.id}>{item.name}</option>
                                 ))}
                             </select>
                         </div>
                         <div>
-                            <label for="category" class="block text-sm/6 font-medium text-gray-900">เลือกหมวดหมู่</label>
-                            <select 
-                                id="category" 
-                                className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2 disabled:opacity-50'
+                            <label className="block text-sm/6 font-medium text-gray-900">เลือกหมวดหมู่</label>
+                            <select
+                                id="category"
+                                value={categorySelected.id || ""}
                                 disabled={!isCategoryEnabled}
-                                onChange={(e) => fetchGroups(e.target.value)}
+                                onChange={handleCategoryChange}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2 disabled:opacity-50"
                             >
-                                <option value="" disabled selected hidden>เลือกหมวดหมู่</option>
+                                <option value="" disabled hidden>เลือกหมวดหมู่</option>
                                 {categories.map((item) => (
                                     <option key={item.id} value={item.id}>{item.name}</option>
                                 ))}
                             </select>
                         </div>
                         <div>
-                            <label for="group" class="block text-sm/6 font-medium text-gray-900">เลือกกลุ่ม</label>
-                            <select 
-                                id="group" 
-                                className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2 disabled:opacity-50'
+                            <label className="block text-sm/6 font-medium text-gray-900">เลือกกลุ่ม</label>
+                            <select
+                                id="group"
+                                value={groupSelected.id || ""}
                                 disabled={!isGroupEnabled}
-                                onChange={(e) => setRental(prev => ({ ...prev, group_id: parseInt(e.target.value) }))}
+                                onChange={handleGroupChange}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2 disabled:opacity-50"
                             >
-                                <option value="" disabled selected hidden>เลือกกลุ่ม</option>
+                                <option value="" disabled hidden>เลือกกลุ่ม</option>
                                 {groups.map((item) => (
                                     <option key={item.id} value={item.id}>{item.name}</option>
                                 ))}
                             </select>
                         </div>
                         <div> 
-                            <label for="name" class="block text-sm/6 font-medium text-gray-900">ชื่อรายการ</label>    
+                            <label className="block text-sm/6 font-medium text-gray-900">ชื่อรายการ</label>    
                             <input 
                                 type="text" 
                                 id="name" 
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
                                 placeholder="ชื่อรายการ"
                                 onChange={(e) => setRental(prev => ({ ...prev, name: e.target.value }))}
                             />
                         </div>
                         <div> 
-                            <label for="price" class="block text-sm/6 font-medium text-gray-900">ราคา</label>    
+                            <label className="block text-sm/6 font-medium text-gray-900">ราคา</label>    
                             <input 
                                 type="number" 
                                 step="0.01" 
                                 id="price" 
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
                                 placeholder="ราคา"
                                 onChange={(e) => setRental(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
                             />
                         </div>
                         <div> 
-                            <label for="unit" class="block text-sm/6 font-medium text-gray-900">หน่วย</label>    
+                            <label className="block text-sm/6 font-medium text-gray-900">หน่วย</label>    
                             <input 
                                 type="text" 
                                 id="unit" 
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
                                 placeholder="ต่อเดือน, ต่อปี"
                                 onChange={(e) => setRental(prev => ({ ...prev, unit: e.target.value }))}
                             />
                         </div>
                         <div> 
-                            <label for="status" class="block text-sm/6 font-medium text-gray-900">หน่วย</label>    
+                            <label className="block text-sm/6 font-medium text-gray-900">หน่วย</label>    
                             <select 
                                 id="status" 
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
                                 onChange={(e) => setRental(prev => ({ ...prev, status: e.target.value }))}
                             >
                                 <option value="ACTIVE">ACTIVE</option>
@@ -386,11 +456,11 @@ function RentalManagement() {
                             </select>
                         </div>
                         <div> 
-                            <label for="description" class="block text-sm/6 font-medium text-gray-900">รายละเอียด</label>    
+                            <label className="block text-sm/6 font-medium text-gray-900">รายละเอียด</label>    
                             <input 
                                 type="text" 
                                 id="description" 
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
                                 placeholder="รายละเอียด"
                                 onChange={(e) => setRental(prev => ({ ...prev, name: e.target.value }))}
                             />
@@ -399,13 +469,13 @@ function RentalManagement() {
                     <div className='flex justify-end gap-3'> 
                         <Button
                             className="w-40"
-                            onClick={() => setIsCreateModalOpen(false)}
+                            onClick={() => handleSubmitCreate()}
                         >
                             Submit
                         </Button>
                         <Button
                             className="w-40 bg-rose-600 hover:bg-rose-700"
-                            onClick={() => setIsCreateModalOpen(false)}
+                            onClick={reset}
                         >
                             Close
                         </Button>
