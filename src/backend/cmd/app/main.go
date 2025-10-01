@@ -1,13 +1,14 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/PakornPK/rent-building/configs"
 	"github.com/PakornPK/rent-building/infra"
+	"github.com/PakornPK/rent-building/logger"
 	"github.com/PakornPK/rent-building/server"
 )
 
@@ -16,17 +17,22 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	logger, err := logger.NewLogger(*cfg)
+	if err != nil {
+		panic(err)
+	}
+	defer logger.Sync()
 
 	db := infra.NewDatabase(&cfg.Database)
 	err = db.Connect()
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		logger.Fatal(fmt.Sprintf("Failed to connect to database: %v", err))
 	}
 	defer func() {
 		if err := db.Close(); err != nil {
-			log.Fatalf("Failed to close database connection: %v", err)
+			logger.Fatal(fmt.Sprintf("Failed to close database connection: %v", err))
 		}
-		log.Println("Database connection closed")
+		logger.Info("Database connection closed")
 	}()
 
 	serverErr := make(chan error, 1)
@@ -34,15 +40,15 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		if err := server.StartServer(db.GetConnectionDB(), *cfg); err != nil {
+		if err := server.StartServer(db.GetConnectionDB(), *cfg, logger); err != nil {
 			serverErr <- err
 		}
 	}()
 
 	select {
 	case err := <-serverErr:
-		log.Fatalf("Server error: %v", err)
+		logger.Fatal(fmt.Sprintf("Server error: %v", err))
 	case <-quit:
-		log.Println("Shutting down server...")
+		logger.Info("Shutting down server...")
 	}
 }

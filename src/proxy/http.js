@@ -8,7 +8,7 @@ async function request(url, options = {}) {
         credentials: options.credentials || 'omit',
     });
     if (response.ok) {
-        return await response.json();
+        return response;
     } else {
         throw new Error(`Request to ${url} failed.`);
     }

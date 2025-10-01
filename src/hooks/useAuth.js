@@ -3,8 +3,6 @@ import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import authProxy from "../proxy/authProxy";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 export function useAuth() {
   const navigate = useNavigate();
 
@@ -29,15 +27,9 @@ export function useAuth() {
 
   const refreshToken = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/auth/refresh`, {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (!res.ok) throw new Error("refresh fail");
-      const data = await res.json();
-      localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("token_type", data.token_type);
+      const res = await authProxy.refreshToken();
+      localStorage.setItem("access_token", res.access_token);
+      localStorage.setItem("token_type", res.token_type);
     } catch (err) {
       logout();
     }

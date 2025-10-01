@@ -10,8 +10,8 @@ import (
 	"github.com/PakornPK/rent-building/internal/middlewares"
 	"github.com/PakornPK/rent-building/internal/repositories"
 	"github.com/PakornPK/rent-building/internal/services"
+	"github.com/PakornPK/rent-building/logger"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
@@ -38,7 +38,7 @@ type repository struct {
 	product        repositories.ProductRepository
 }
 
-func StartServer(conn *infra.ConnectionDB, cfg configs.Config) error {
+func StartServer(conn *infra.ConnectionDB, cfg configs.Config, logger logger.Logger) error {
 	appCfg := fiber.Config{
 		DisableStartupMessage: true,
 	}
@@ -46,10 +46,9 @@ func StartServer(conn *infra.ConnectionDB, cfg configs.Config) error {
 
 	repo := InitializeRepository(conn)
 	service := initializeService(repo, cfg)
-	handler := initializeHandlers(service, cfg)
+	handler := initializeHandlers(service, cfg, logger)
 	initializedRouter(app, handler, cfg)
-
-	log.Info("Starting server on port:", cfg.Server.Port)
+	logger.Info(fmt.Sprintf("Starting server on port: %d", cfg.Server.Port))
 	return app.Listen(fmt.Sprintf(":%d", cfg.Server.Port))
 }
 
@@ -106,11 +105,11 @@ func initializeService(repo *repository, cfg configs.Config) *server {
 	}
 }
 
-func initializeHandlers(service *server, cfg configs.Config) *handler {
+func initializeHandlers(service *server, cfg configs.Config, logger logger.Logger) *handler {
 	// Initialize user handler
-	userHandler := handlers.NewUserHandler(service.user)
+	userHandler := handlers.NewUserHandler(service.user, logger)
 	authHandler := handlers.NewAuthHandler(service.auth).SetSecure(cfg.App.IsProduction())
-	rentalHandler := handlers.NewRentalsHandler(service.rental)
+	rentalHandler := handlers.NewRentalsHandler(service.rental, logger)
 	masterDataHandler := handlers.NewMasterDataHandler(service.masterData)
 	return &handler{
 		auth:       authHandler,

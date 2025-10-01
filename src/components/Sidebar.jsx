@@ -11,22 +11,14 @@ import {
 } from '@heroicons/react/24/solid';
 import { NavLink } from 'react-router-dom'; // เปลี่ยนจาก 'react-router' เป็น 'react-router-dom'
 import { useNavigate } from "react-router-dom";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import authProxy from "../proxy/authProxy";
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
   const logout = async () => {
-    const token = localStorage.getItem("access_token")
-    const tokenType = localStorage.getItem("token_type")
-    await fetch(`${API_URL}/api/auth/logout`, {
-      method: "POST",
-      headers: { 
-        "Authorization": `${tokenType} ${token}`
-      }
-    })
+    await authProxy.logout();
     localStorage.removeItem("access_token");
     localStorage.removeItem("token_type");
     navigate("/login");

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link, Navigate, NavLink } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
+import authProxy from "../proxy/authProxy";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -41,23 +42,12 @@ const LoginPage = () => {
 
 
         try {
-            const response = await fetch(`${API_URL}/api/auth/login`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ email, password }),
-            });
-            if (response.ok) {
-                const data = await response.json();
-                localStorage.setItem("token_type", data.token_type)
-                localStorage.setItem("access_token", data.access_token)
-                return <Navigate to="/" replace />;
-            } else {
-                setError('Invalid email or password.');
-            }
+            const res = await authProxy.login({ email, password });            
+            localStorage.setItem("token_type", res.token_type)
+            localStorage.setItem("access_token", res.access_token)
+            return <Navigate to="/" replace />;
         } catch (err) {
-            console.error('Login error:', err);
+            console.error(err);
             setError('An unexpected error occurred. Please try again.');
         } finally {
             setLoading(false); 

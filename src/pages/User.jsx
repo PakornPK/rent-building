@@ -6,6 +6,7 @@ import Modal from '../components/Modal';
 import UploadFile from '../components/UploadFile';
 import ToggleSwitch from '../components/ToggleSwitch';
 import { jwtDecode } from "jwt-decode";
+import userProxy from "../proxy/userProxy";
 
 // กำหนด Columns สำหรับตาราง
 const columns = [
@@ -33,12 +34,7 @@ function User() {
   const fetched = useRef(false);
   const fetchUsers = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/users?page=${currentPage}&page_size=${pageSize}&sort=ASC`, {
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      });
-
+      const res = await userProxy.getUsers(currentPage, pageSize, "ASC");
       if (!res.ok) {
         throw new Error("Failed to fetch users");
       }
@@ -86,15 +82,7 @@ function User() {
         phone: user?.phone,
         organization: user?.organization
       }
-      const res = await fetch(`${API_URL}/api/users/${user?.id}`, {
-        method: "PUT",
-        headers: {
-          'Content-Type': 'application/json',
-          "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
-        },
-        body: JSON.stringify(body)
-      });
-
+      const res = await userProxy.updateUser(user?.id, body);
       if (!res.ok) {
         throw new Error("Failed to fetch users");
       }
@@ -107,14 +95,7 @@ function User() {
 
   const deleteUser = async (user) => {
     try {
-      const res = await fetch(`${API_URL}/api/users/${user?.id}`, {
-        method: "DELETE",
-        headers: {
-          'Content-Type': 'application/json',
-          "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
-        }
-      });
-
+      const res = await userProxy.deleteUser(user?.id);
       if (!res.ok) {
         throw new Error("Failed to deleteUser users");
       }
@@ -135,15 +116,7 @@ function User() {
         phone: user?.phone,
         organization: user?.organization
       }]
-      const res = await fetch(`${API_URL}/api/users`, {
-        method: "POST",
-        headers: {
-          'Content-Type': 'application/json',
-          "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
-        },
-        body: JSON.stringify(body)
-      });
-
+      const res = await userProxy.createUser(body);
       if (!res.ok) {
         throw new Error("Failed to fetch users");
       }

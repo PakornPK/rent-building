@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"github.com/PakornPK/rent-building/internal/services"
+	"github.com/PakornPK/rent-building/logger"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type RentalsHandler interface {
@@ -15,13 +17,16 @@ type RentalsHandler interface {
 
 type rentalsHandler struct {
 	service services.RentalService
+	logger  logger.Logger
 }
 
-func NewRentalsHandler(service services.RentalService) RentalsHandler {
-	return &rentalsHandler{service: service}
+func NewRentalsHandler(service services.RentalService, logger logger.Logger) RentalsHandler {
+	return &rentalsHandler{service: service, logger: logger}
 }
 
 func (h *rentalsHandler) ListRentals(c *fiber.Ctx) error {
+	requestID := c.Get("Request-Id", uuid.New().String())
+	logger := h.logger.WithRequestID(requestID).WithUserID(c.Locals("userID").(int))
 	input, err := paginationInputBuilder(c.Queries())
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -35,10 +40,13 @@ func (h *rentalsHandler) ListRentals(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
+	logger.Info("Rentals listed successfully")
 	return c.Status(fiber.StatusOK).JSON(rentals)
 }
 
 func (h *rentalsHandler) CreateRental(c *fiber.Ctx) error {
+	requestID := c.Get("Request-Id", uuid.New().String())
+	logger := h.logger.WithRequestID(requestID).WithUserID(c.Locals("userID").(int))
 	var input []services.RentalInput
 	if err := c.BodyParser(&input); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -50,12 +58,15 @@ func (h *rentalsHandler) CreateRental(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
+	logger.Info("Rental created successfully")
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "rental created successfully",
 	})
 }
 
 func (h *rentalsHandler) GetRental(c *fiber.Ctx) error {
+	requestID := c.Get("Request-Id", uuid.New().String())
+	logger := h.logger.WithRequestID(requestID).WithUserID(c.Locals("userID").(int))
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -68,10 +79,13 @@ func (h *rentalsHandler) GetRental(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
+	logger.Info("Rental retrieved successfully")
 	return c.Status(fiber.StatusOK).JSON(rental)
 }
 
 func (h *rentalsHandler) UpdateRental(c *fiber.Ctx) error {
+	requestID := c.Get("Request-Id", uuid.New().String())
+	logger := h.logger.WithRequestID(requestID).WithUserID(c.Locals("userID").(int))
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -89,6 +103,7 @@ func (h *rentalsHandler) UpdateRental(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
+	logger.Info("Rental updated successfully")
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "rental updated successfully",
 	})
