@@ -37,6 +37,8 @@ function RentalManagement() {
     const [rental, setRental] = useState({ status: "ACTIVE", description: ""})
     const [rentalsList, setRentalsList] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [item, setItem] = useState(0);
     const navigate = useNavigate();
     const handlePageChange = (page) => {
         setCurrentPage(page);
@@ -153,6 +155,22 @@ function RentalManagement() {
             throw new Error("Failed to create rental");
         }
         reset();
+        window.location.reload();
+    };
+    const handleDelete = async (id) => {
+        const res = await rentalsProxy.deleteRental(id);
+        if (!res?.ok) {
+            throw new Error("Failed to delete rental");
+        }
+        reset();
+        setIsConfirmOpen(false);
+        window.location.reload();
+    };
+    const confirmDeleteModal = (id) => {
+        console.log(id);
+        
+        setItem(id)
+        setIsConfirmOpen(true)
     };
     return (
         <div className='p-3'>
@@ -189,7 +207,7 @@ function RentalManagement() {
                     columns={COLUMNS}
                     onView={(row) => console.log(row.id)}
                     onEdit={(row) => navigate("/rental-management/"+ row.id)}
-                    onDelete={(row) => console.log(row.id)}
+                    onDelete={(row) => confirmDeleteModal(row.id)}
                 />
 
                 <Pagination
@@ -356,6 +374,28 @@ function RentalManagement() {
                     </div>
                 </Modal>
             )}
+
+        {isConfirmOpen && (
+            <Modal className="max-w-xs">
+            <div>
+                <div className='text-xl p-4 text-center'>Confirm delete?</div>
+            </div>
+            <div className='flex justify-center gap-3'>
+                <Button
+                className={"w-25 bg-rose-600 hover:bg-rose-700"}
+                onClick={async () => await handleDelete(item)}
+                >
+                Delete
+                </Button>
+                <Button
+                className={"w-25"}
+                onClick={() => setIsConfirmOpen(false)}
+                >
+                Close
+                </Button>
+            </div>
+            </Modal>
+        )}
         </div>
     )
 }
