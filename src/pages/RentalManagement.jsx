@@ -7,6 +7,7 @@ import Table from '../components/Table';
 import Pagination from '../components/Pagination';
 import { DocumentArrowUpIcon } from '@heroicons/react/24/outline';
 import masterDataProxy from '../proxy/masterDataProxy';
+import rentalsProxy from '../proxy/rentalsProxy';
 
 const COLUMNS = [
     { header: 'ID', accessor: 'id' },
@@ -18,119 +19,6 @@ const COLUMNS = [
     { header: 'หน่วย', accessor: 'unit' },
     { header: 'สถานะ', accessor: 'status' },
 ];
-
-const DATA = [
-    {
-        id: 1,
-        type: "งานบริการ",
-        category: "ทำความสะอาด",
-        group: "เครื่องใช้ไฟฟ้า",
-        item: "ล้างแอร์",
-        unit: "เครื่อง",
-        price: "500",
-        status: "ACTIVE"
-    },
-    {
-        id: 2,
-        type: "งานบริการ",
-        category: "ทำความสะอาด",
-        group: "ภายในห้อง",
-        item: "ล้างห้องน้ำ",
-        unit: "ครั้ง",
-        price: "500",
-        status: "ACTIVE"
-    },
-    {
-        id: 3,
-        type: "เฟอร์นิเจอร์",
-        category: "เครื่องใช้ไฟฟ้า",
-        group: "เครื่องใช้ไฟฟ้า",
-        item: "แอร์",
-        unit: "เครื่อง",
-        price: "500",
-        status: "ACTIVE"
-    },
-    {
-        id: 4,
-        type: "เฟอร์นิเจอร์",
-        category: "เครื่องใช้ไฟฟ้า",
-        group: "เครื่องครัว",
-        item: "ไมโครเวฟ",
-        unit: "เครื่อง",
-        price: "200",
-        status: "ACTIVE"
-    },
-    {
-        id: 5,
-        type: "ลานจอดรถ",
-        category: "ลานจอดรถ",
-        group: "ลานจอดรถ",
-        item: "ลานจอดรถ",
-        unit: "ที่",
-        price: "500",
-        status: "ACTIVE"
-    },
-    {
-        id: 6,
-        type: "น้ำประปา",
-        category: "น้ำประปา",
-        group: "น้ำประปา",
-        item: "น้ำประปา",
-        unit: "หน่วย",
-        price: "20",
-        status: "ACTIVE"
-    },
-    {
-        id: 7,
-        type: "ไฟฟ้า",
-        category: "ไฟฟ้า",
-        group: "ไฟฟ้า",
-        item: "ไฟฟ้า",
-        unit: "หน่วย",
-        price: "8",
-        status: "ACTIVE"
-    },
-    {
-        id: 8,
-        type: "ห้องเช่า",
-        category: "ห้องเช่า",
-        group: "ห้องเช่า",
-        item: "ห้องเช่า Std.",
-        unit: "เดือน",
-        price: "3,000",
-        status: "ACTIVE"
-    },
-    {
-        id: 9,
-        type: "ห้องเช่า",
-        category: "ห้องเช่า",
-        group: "ห้องเช่า",
-        item: "ห้องเช่า D-Lux",
-        unit: "เดือน",
-        price: "5,000",
-        status: "ACTIVE"
-    },
-    {
-        id: 10,
-        type: "ห้องเช่า",
-        category: "ห้องเช่า",
-        group: "ห้องเช่า",
-        item: "ห้องเช่ารายวัน",
-        unit: "วัน",
-        price: "500",
-        status: "ACTIVE"
-    },
-    {
-        id: 11,
-        type: "ห้องเช่า",
-        category: "ห้องเช่า",
-        group: "ห้องเช่า",
-        item: "ห้องเช่าชั่วคราว",
-        unit: "ชั่วคราว",
-        price: "300",
-        status: "ACTIVE"
-    },
-]
 
 const pageSize = 10;
 
@@ -146,7 +34,9 @@ function RentalManagement() {
     const [groupSelected, setGroupSelected] = useState({id:0, name:"เลือกกลุ่ม"});
     const [categories, setCategories] = useState([]);
     const [groups, setGroups] = useState([]);
-    const [rental, setRental] = useState({})
+    const [rental, setRental] = useState({ status: "ACTIVE", description: ""})
+    const [rentalsList, setRentalsList] = useState([]);
+    const [totalItems, setTotalItems] = useState(0);
     const navigate = useNavigate();
     const handlePageChange = (page) => {
         setCurrentPage(page);
@@ -175,7 +65,32 @@ function RentalManagement() {
             setGroups(data);
         }
     }, [categorySelected]);
+
+    const fetchRentals = useCallback(async () => {
+        const res = await rentalsProxy.getRentals(currentPage, pageSize, "ASC");
+        if (res?.ok) {
+            const { data, total_rows } = await res.json();
+            const list = data.map((item) => {
+                return {
+                    id: item.id,
+                    type: item.group.category.type.name,
+                    category: item.group.category.name,
+                    group: item.group.name,
+                    item: item.name,
+                    price: item.price.toFixed(2),
+                    unit: item.unit,
+                    status: item.status,
+                };
+            });
+            setTotalItems(total_rows);
+            setRentalsList(list);
+        }
+    }, [currentPage]);
     
+    useEffect(() => {
+        fetchRentals();
+    }, [fetchRentals]);
+
     useEffect(() => {
         fetchTypes();
     }, [fetchTypes]);
@@ -184,7 +99,6 @@ function RentalManagement() {
         if (isCategoryEnabled) {
             fetchCategories();
         }
-
     }, [isCategoryEnabled, fetchCategories]);
 
     useEffect(() => {
@@ -195,14 +109,15 @@ function RentalManagement() {
 
     useEffect(() => {
         if (categories.length === 1) {
-          setCategorySelected({ id: categories[0].id, name: categories[0].name });
-          setIsGroupEnabled(true);
+            setCategorySelected({ id: categories[0].id, name: categories[0].name });
+            setIsGroupEnabled(true);
         }
     }, [categories]);
     
     useEffect(() => {
         if (groups.length === 1) {
             setGroupSelected({ id: groups[0].id, name: groups[0].name });
+            setRental({...rental, group_id: groups[0].id});
         }
     }, [groups]);
 
@@ -213,7 +128,7 @@ function RentalManagement() {
         setTypeSelected({id:0, name:"เลือกประเภท"});
         setCategorySelected({id:0, name:"เลือกหมวดหมู่"});
         setGroupSelected({id:0, name:"เลือกกลุ่ม"});
-        setRental({});
+        setRental({ status: "ACTIVE", description: "" });
     };
     const handleTypeChange = (e) => {
         const { value, options, selectedIndex } = e.target;
@@ -229,10 +144,14 @@ function RentalManagement() {
 
     const handleGroupChange = (e) => {
         setGroupSelected({id:e.target.value, name:e.target.text});
+        setRental({...rental, group_id: e.target.value});
     };
 
-    const handleSubmitCreate = async () => {
-        console.log(groupSelected);
+    const handleSubmitCreate = async (e) => {
+        const res = await rentalsProxy.createRental([rental]);
+        if (!res?.ok) {
+            throw new Error("Failed to create rental");
+        }
         reset();
     };
     return (
@@ -266,17 +185,15 @@ function RentalManagement() {
                 <h1 className="mb-4 text-2xl font-bold">ตารางข้อมูลผู้ใช้งาน</h1>
 
                 <Table
-                    data={DATA}
+                    data={rentalsList}
                     columns={COLUMNS}
-                    pageSize={pageSize}
-                    currentPage={currentPage}
                     onView={(row) => console.log(row.id)}
                     onEdit={(row) => navigate("/rental-management/"+ row.id)}
                     onDelete={(row) => console.log(row.id)}
                 />
 
                 <Pagination
-                    totalItems={DATA.length}
+                    totalItems={totalItems}
                     pageSize={pageSize}
                     currentPage={currentPage}
                     onPageChange={handlePageChange}
@@ -369,6 +286,7 @@ function RentalManagement() {
                                 id="status" 
                                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
                                 onChange={(e) => setRental(prev => ({ ...prev, status: e.target.value }))}
+                                value={rental.status || "ACTIVE"}
                             >
                                 <option value="ACTIVE">ACTIVE</option>
                                 <option value="INACTIVE">INACTIVE</option>
@@ -381,7 +299,7 @@ function RentalManagement() {
                                 id="description" 
                                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
                                 placeholder="รายละเอียด"
-                                onChange={(e) => setRental(prev => ({ ...prev, name: e.target.value }))}
+                                onChange={(e) => setRental(prev => ({ ...prev, description: e.target.value }))}
                             />
                         </div>
                     </div>

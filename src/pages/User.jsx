@@ -31,6 +31,7 @@ function User() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [user, setUser] = useState({})
   const [users, setUsers] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
   const fetched = useRef(false);
   const fetchUsers = async () => {
     try {
@@ -40,6 +41,7 @@ function User() {
       }
       const data = await res.json();
       setUsers(data?.data);
+      setTotalItems(data?.total_rows);
     } catch (err) {
       setError(err.message);
     }
@@ -149,15 +151,13 @@ function User() {
         <Table
           data={users}
           columns={columns}
-          pageSize={pageSize}
-          currentPage={currentPage}
           onEdit={(row) => viewDetailModal(row)}
           onDelete={(row) => confirmDeleteModal(row)}
         />
 
         {/* ส่ง props ทั้งหมดไปให้ Pagination */}
         <Pagination
-          totalItems={users.length}
+          totalItems={totalItems}
           pageSize={pageSize}
           currentPage={currentPage}
           onPageChange={handlePageChange}

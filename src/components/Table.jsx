@@ -3,9 +3,8 @@ import { PencilSquareIcon } from '@heroicons/react/16/solid';
 import React from 'react';
 import ToggleSwitch from './ToggleSwitch';
 
-const Table = ({ data, columns, pageSize, currentPage, onView, onEdit, onDelete }) => {
-  const startIndex = (currentPage - 1) * pageSize;
-  const currentData = data?.slice(startIndex, startIndex + pageSize) || [];
+const Table = ({ data, columns, onView, onEdit, onDelete }) => {
+  const currentData = Array.isArray(data) ? data : [];
   const isView = onView || false
   const isEdit = onEdit || false
   const isDelete = onDelete || false
@@ -30,34 +29,29 @@ const Table = ({ data, columns, pageSize, currentPage, onView, onEdit, onDelete 
         </thead>
         {/* ส่วนข้อมูล */}
         <tbody>
-          {currentData.map((row, rowIndex) => (
-            <tr key={rowIndex} className="bg-white border-b hover:bg-gray-50">
+          {currentData.map((row) => (
+            <tr key={row.id} className="bg-white border-b hover:bg-gray-50">
               {columns.map((column, colIndex) => (
                 <td key={colIndex} className="px-6 py-4">
-                  {/* เข้าถึงข้อมูลจาก key ที่เรากำหนดไว้ใน props 'accessor' */}
-                  {typeof row[column.accessor] === 'boolean'? (<ToggleSwitch swEnabled={row[column.accessor]} />): row[column.accessor]}
+                  {typeof row[column.accessor] === 'boolean'
+                    ? (<ToggleSwitch swEnabled={row[column.accessor]} />)
+                    : row[column.accessor]}
                 </td>
               ))}
               {isAction && (
                 <td>
                   {isView && (
-                    <button
-                      onClick={() => onView(row)}
-                    >
+                    <button onClick={() => onView(row)}>
                       <DocumentMagnifyingGlassIcon className='h-5 w-5 mr-3 hover:bg-blue-600 rounded hover:text-white' />
                     </button>
                   )}
                   {isEdit && (
-                    <button
-                      onClick={() => onEdit(row)}
-                    >
+                    <button onClick={() => onEdit(row)}>
                       <PencilSquareIcon className='h-5 w-5 mr-3 hover:bg-blue-600 rounded hover:text-white' />
                     </button>
                   )}
                   {isDelete && (
-                    <button
-                      onClick={() => onDelete(row)}
-                    >
+                    <button onClick={() => onDelete(row)}>
                       <TrashIcon className='h-5 w-5 mr-3 hover:bg-blue-600 rounded hover:text-white' />
                     </button>
                   )}

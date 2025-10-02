@@ -55,8 +55,6 @@ function RoomManagement() {
                 <Table
                     data={DATA}
                     columns={COLUMNS}
-                    pageSize={pageSize}
-                    currentPage={currentPage}
                     onView={(row) => console.log(row.id)}
                     onEdit={(row) => console.log(row.id)}
                     onDelete={(row) => console.log(row.id)}
