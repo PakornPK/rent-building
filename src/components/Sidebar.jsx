@@ -18,7 +18,7 @@ const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const logout = async () => {
-    await authProxy.logout();
+    authProxy.logout();
     localStorage.removeItem("access_token");
     localStorage.removeItem("token_type");
     navigate("/login");
