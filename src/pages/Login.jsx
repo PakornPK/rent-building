@@ -1,10 +1,9 @@
 // src/components/LoginPage.jsx
 import React, { useState } from 'react';
-import { Link, Navigate, NavLink } from 'react-router-dom';
+import { Navigate, NavLink } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import authProxy from "../proxy/authProxy";
 
-const API_URL = import.meta.env.VITE_API_URL;
 
 function isTokenValid(token) {
   try {
@@ -19,8 +18,7 @@ const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    
+    const [loading, setLoading] = useState(false);  
     const token = localStorage.getItem("access_token");
     const valid = token && isTokenValid(token)
     if (valid) {
@@ -42,9 +40,13 @@ const LoginPage = () => {
 
 
         try {
-            const res = await authProxy.login({ email, password });            
-            localStorage.setItem("token_type", res.token_type)
-            localStorage.setItem("access_token", res.access_token)
+            const res = await authProxy.login({ email, password });    
+            if (!res.ok) {
+                throw new Error("Invalid email or password");
+            }
+            const data = await res.json();
+            localStorage.setItem("token_type", data.token_type)
+            localStorage.setItem("access_token", data.access_token)
             return <Navigate to="/" replace />;
         } catch (err) {
             console.error(err);
