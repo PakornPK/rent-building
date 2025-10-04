@@ -38,7 +38,8 @@ function RentalManagement() {
     const [rentalsList, setRentalsList] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-    const [item, setItem] = useState(0);
+    const [itemId, setItemId] = useState(0);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const navigate = useNavigate();
     const handlePageChange = (page) => {
         setCurrentPage(page);
@@ -167,9 +168,7 @@ function RentalManagement() {
         window.location.reload();
     };
     const confirmDeleteModal = (id) => {
-        console.log(id);
-        
-        setItem(id)
+        setItemId(id)
         setIsConfirmOpen(true)
     };
     return (
@@ -205,7 +204,6 @@ function RentalManagement() {
                 <Table
                     data={rentalsList}
                     columns={COLUMNS}
-                    onView={(row) => console.log(row.id)}
                     onEdit={(row) => navigate("/rental-management/"+ row.id)}
                     onDelete={(row) => confirmDeleteModal(row.id)}
                 />
@@ -338,6 +336,122 @@ function RentalManagement() {
                 </div>
                 </Modal>
             )}
+            
+            {isEditModalOpen && (
+                <Modal className="max-w-4xl">
+                <div className='flex flex-col gap-3'>
+                    <div className='text-2xl p-4 text-center'>เพิ่มรายการ</div>
+                    <div className="grid gap-6 mb-6 md:grid-cols-2">
+                        <div>
+                            <label className="block text-sm/6 font-medium text-gray-900">เลือกประเภท</label>
+                            <input
+                                type="text"
+                                id="type"
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
+                                placeholder="ประเภท"
+                                value={rental.type}
+                                onChange={(e) => setRental(prev => ({ ...prev, type: e.target.value }))}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm/6 font-medium text-gray-900">เลือกหมวดหมู่</label>
+                            <input
+                                type="text"
+                                id="category"
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
+                            >
+                                <option value="" disabled hidden>เลือกหมวดหมู่</option>
+                                {categories.map((item) => (
+                                    <option key={item.id} value={item.id}>{item.name}</option>
+                                ))}
+                            </input>
+                        </div>
+                        <div>
+                            <label className="block text-sm/6 font-medium text-gray-900">เลือกกลุ่ม</label>
+                            <select
+                                id="group"
+                                value={groupSelected.id || ""}
+                                disabled={!isGroupEnabled}
+                                onChange={handleGroupChange}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2 disabled:opacity-50"
+                            >
+                                <option value="" disabled hidden>เลือกกลุ่ม</option>
+                                {groups.map((item) => (
+                                    <option key={item.id} value={item.id}>{item.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div> 
+                            <label className="block text-sm/6 font-medium text-gray-900">ชื่อรายการ</label>    
+                            <input 
+                                type="text" 
+                                id="name" 
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
+                                placeholder="ชื่อรายการ"
+                                onChange={(e) => setRental(prev => ({ ...prev, name: e.target.value }))}
+                            />
+                        </div>
+                        <div> 
+                            <label className="block text-sm/6 font-medium text-gray-900">ราคา</label>    
+                            <input 
+                                type="number" 
+                                step="0.01" 
+                                id="price" 
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
+                                placeholder="ราคา"
+                                onChange={(e) => setRental(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
+                            />
+                        </div>
+                        <div> 
+                            <label className="block text-sm/6 font-medium text-gray-900">หน่วย</label>    
+                            <input 
+                                type="text" 
+                                id="unit" 
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
+                                placeholder="ต่อเดือน, ต่อปี"
+                                onChange={(e) => setRental(prev => ({ ...prev, unit: e.target.value }))}
+                            />
+                        </div>
+                        <div> 
+                            <label className="block text-sm/6 font-medium text-gray-900">หน่วย</label>    
+                            <select 
+                                id="status" 
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
+                                onChange={(e) => setRental(prev => ({ ...prev, status: e.target.value }))}
+                                value={rental.status || "ACTIVE"}
+                            >
+                                <option value="ACTIVE">ACTIVE</option>
+                                <option value="INACTIVE">INACTIVE</option>
+                            </select>
+                        </div>
+                        <div> 
+                            <label className="block text-sm/6 font-medium text-gray-900">รายละเอียด</label>    
+                            <input 
+                                type="text" 
+                                id="description" 
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2" 
+                                placeholder="รายละเอียด"
+                                onChange={(e) => setRental(prev => ({ ...prev, description: e.target.value }))}
+                            />
+                        </div>
+                    </div>
+                    <div className='flex justify-end gap-3'> 
+                        <Button
+                            className="w-40"
+                            onClick={() => handleSubmitCreate()}
+                        >
+                            Submit
+                        </Button>
+                        <Button
+                            className="w-40 bg-rose-600 hover:bg-rose-700"
+                            onClick={reset}
+                        >
+                            Close
+                        </Button>
+                    </div>
+                </div>
+                </Modal>
+            )}
 
             {isModalFileUploadOpen && (
                 <Modal className="max-w-4xl">
@@ -383,7 +497,7 @@ function RentalManagement() {
             <div className='flex justify-center gap-3'>
                 <Button
                 className={"w-25 bg-rose-600 hover:bg-rose-700"}
-                onClick={async () => await handleDelete(item)}
+                onClick={async () => await handleDelete(itemId)}
                 >
                 Delete
                 </Button>
