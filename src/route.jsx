@@ -6,7 +6,6 @@ import User from './pages/User';
 import RentalManagement from './pages/RentalManagement';
 import RoomManagement from './pages/RoomManagement';
 import RenterManagement from './pages/RenterManagement';
-import RentalView from './pages/RentalView';
 import UtilitiesCost from './pages/UtilitiesCost';
 import Healthdesk from './pages/Healthdesk';
 import ChangePassword from './pages/ChangePassword';
@@ -23,10 +22,6 @@ const router = createBrowserRouter([
       {
         path: "/rental-management",
         element: <RentalManagement />
-      },
-      {
-        path: "/rental-management/:rental_id",
-        element: <RentalView />
       },
       {
         path: "/room-management",
