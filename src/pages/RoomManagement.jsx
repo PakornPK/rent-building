@@ -3,16 +3,16 @@ import Button from '../components/Button'
 import Modal from '../components/Modal';
 import UploadFile from '../components/UploadFile';
 import Table from '../components/Table';
-import Pagination from '../components/Pagination';
+import Pagination from '@mui/material/Pagination';
 
 const COLUMNS = [
-    { header: 'ID', accessor: 'id' },
-    { header: 'หมายเลขตึก', accessor: 'building' },
-    { header: 'หมายเลขชั้น', accessor: 'floor' },
-    { header: 'หมายเลขห้อง', accessor: 'room' },
-    { header: 'ราคา (บาท)', accessor: 'price' },
-    { header: 'หน่วย', accessor: 'unit' },
-    { header: 'สถานะ', accessor: 'status' },
+  { field: 'id', headerName: 'ID', flex: 1 },
+  { field: 'building', headerName: 'หมายเลขตึก', flex: 1 },
+  { field: 'floor', headerName: 'หมายเลขชั้น', flex: 1 },
+  { field: 'room', headerName: 'หมายเลขห้อง', flex: 1 },
+  { field: 'price', headerName: 'ราคา (บาท)', flex: 1, type: 'number' },
+  { field: 'unit', headerName: 'หน่วย', flex: 1 },
+  { field: 'status', headerName: 'สถานะ', flex: 1 },
 ];
 
 const DATA = [
@@ -32,6 +32,7 @@ const pageSize = 10;
 function RoomManagement() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
@@ -59,13 +60,16 @@ function RoomManagement() {
                     onEdit={(row) => console.log(row.id)}
                     onDelete={(row) => console.log(row.id)}
                 />
-
-                <Pagination
-                    totalItems={DATA.length}
-                    pageSize={pageSize}
-                    currentPage={currentPage}
-                    onPageChange={handlePageChange}
-                />
+                <div className="mt-4 flex justify-center">
+                    <Pagination
+                        count={Math.ceil(totalItems / pageSize)} // จำนวนหน้าทั้งหมด
+                        page={currentPage} // หน้า active
+                        onChange={(e, page) => setCurrentPage(page)} // update state แล้ว useEffect จะ fetch API
+                        size='medium'
+                        color="primary"
+                        shape="rounded"
+                    />
+                </div>
             </div>
 
             {isModalOpen && (

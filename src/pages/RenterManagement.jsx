@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Table from '../components/Table';
-import Pagination from '../components/Pagination';
+import Pagination from '@mui/material/Pagination';
 import Button from '../components/Button'
 import Modal from '../components/Modal';
 import UploadFile from '../components/UploadFile';
@@ -14,10 +14,10 @@ const DUMMY_DATA = Array.from({ length: 100 }, (_, i) => ({
 
 // กำหนด Columns สำหรับตาราง
 const COLUMNS = [
-    { header: 'ID', accessor: 'id' },
-    { header: 'ชื่อ', accessor: 'name' },
-    { header: 'อีเมล', accessor: 'email' },
-    { header: 'บทบาท', accessor: 'role' },
+  { field: 'id', headerName: 'ID', flex: 1 },
+  { field: 'name', headerName: 'ชื่อ', flex: 1 },
+  { field: 'email', headerName: 'อีเมล', flex: 1 },
+  { field: 'role', headerName: 'บทบาท', flex: 1 },
 ];
 
 const pageSize = 10; // จำนวนข้อมูลต่อหน้า
@@ -25,6 +25,7 @@ const pageSize = 10; // จำนวนข้อมูลต่อหน้า
 function RenterManagement() {
     const [currentPage, setCurrentPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [totalItems, setTotalItems] = useState(0);
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
@@ -54,14 +55,16 @@ function RenterManagement() {
                     onEdit={(row) => console.log(row.id)}
                     onDelete={(row) => console.log(row.id)}
                 />
-
-                {/* ส่ง props ทั้งหมดไปให้ Pagination */}
-                <Pagination
-                    totalItems={DUMMY_DATA.length}
-                    pageSize={pageSize}
-                    currentPage={currentPage}
-                    onPageChange={handlePageChange}
-                />
+                <div className="mt-4 flex justify-center">
+                    <Pagination
+                        count={Math.ceil(totalItems / pageSize)} // จำนวนหน้าทั้งหมด
+                        page={currentPage} // หน้า active
+                        onChange={(e, page) => setCurrentPage(page)} // update state แล้ว useEffect จะ fetch API
+                        size='medium'
+                        color="primary"
+                        shape="rounded"
+                    />
+                </div>
             </div>
 
             {isModalOpen && (

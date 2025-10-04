@@ -4,23 +4,21 @@ import Button from '../components/Button'
 import Modal from '../components/Modal';
 // import UploadFile from '../components/UploadFile';
 import Table from '../components/Table';
-import Pagination from '../components/Pagination';
+import Pagination from '@mui/material/Pagination';
 import { DocumentArrowUpIcon } from '@heroicons/react/24/outline';
 import masterDataProxy from '../proxy/masterDataProxy';
 import rentalsProxy from '../proxy/rentalsProxy';
 
 const COLUMNS = [
-    { header: 'ID', accessor: 'id' },
-    { header: 'ประเภท', accessor: 'type' },
-    { header: 'หมวดหมู่', accessor: 'category' },
-    { header: 'กลุ่ม', accessor: 'group' },
-    { header: 'รายการ', accessor: 'name' },
-    { header: 'ราคา (บาท)', accessor: 'price' },
-    { header: 'หน่วย', accessor: 'unit' },
-    { header: 'สถานะ', accessor: 'status' },
+    { field: 'id', headerName: 'ID', flex: 1 },
+    { field: 'type', headerName: 'ประเภท', flex: 1 },
+    { field: 'category', headerName: 'หมวดหมู่', flex: 1 },
+    { field: 'group', headerName: 'กลุ่ม', flex: 1 },
+    { field: 'name', headerName: 'รายการ', flex: 1 },
+    { field: 'price', headerName: 'ราคา (บาท)', type: 'number', flex: 1 },
+    { field: 'unit', headerName: 'หน่วย', flex: 1 },
+    { field: 'status', headerName: 'สถานะ', flex: 1 },
 ];
-
-const pageSize = 10;
 
 function RentalManagement() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -40,6 +38,8 @@ function RentalManagement() {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [item, setItem] = useState({});
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [pageSize, setPageSize] = useState(10);
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
@@ -68,30 +68,35 @@ function RentalManagement() {
         }
     }, [categorySelected]);
 
-    const fetchRentals = useCallback(async () => {
-        const res = await rentalsProxy.getRentals(currentPage, pageSize, "ASC");
-        if (res?.ok) {
+    const fetchRentals = useCallback(async (page = 1) => {
+        setIsLoading(true);
+        try {
+            const res = await rentalsProxy.getRentals(page, pageSize, "ASC");
+            if (!res?.ok) throw new Error("Failed to fetch rentals");
+
             const { data, total_rows } = await res.json();
-            const list = data.map((item) => {
-                return {
-                    id: item.id,
-                    type: item.group.category.type.name,
-                    category: item.group.category.name,
-                    group: item.group.name,
-                    name: item.name,
-                    price: item.price.toFixed(2),
-                    unit: item.unit,
-                    status: item.status,
-                };
-            });
-            setTotalItems(total_rows);
+            const list = data.map(item => ({
+                id: item.id,
+                type: item.group.category.type.name,
+                category: item.group.category.name,
+                group: item.group.name,
+                name: item.name,
+                price: item.price.toFixed(2),
+                unit: item.unit,
+                status: item.status,
+            }));
+
             setRentalsList(list);
+            setTotalItems(total_rows);
+            setIsLoading(false);
+        } catch (err) {
+            console.error(err);
         }
-    }, [currentPage]);
+    }, []);
     
     useEffect(() => {
-        fetchRentals();
-    }, [fetchRentals]);
+        fetchRentals(currentPage);
+    }, [fetchRentals, currentPage]);
 
     useEffect(() => {
         fetchTypes();
@@ -226,14 +231,18 @@ function RentalManagement() {
                     columns={COLUMNS}
                     onEdit={(row) => handleEdit(row.id)}
                     onDelete={(row) => confirmDeleteModal(row.id)}
+                    loading={isLoading}
                 />
-
-                <Pagination
-                    totalItems={totalItems}
-                    pageSize={pageSize}
-                    currentPage={currentPage}
-                    onPageChange={handlePageChange}
-                />
+                <div className="mt-4 flex justify-center">
+                    <Pagination
+                        count={Math.ceil(totalItems / pageSize)} // จำนวนหน้าทั้งหมด
+                        page={currentPage} // หน้า active
+                        onChange={(e, page) => setCurrentPage(page)} // update state แล้ว useEffect จะ fetch API
+                        size='medium'
+                        color="primary"
+                        shape="rounded"
+                    />
+                </div>
             </div>
 
             {isCreateModalOpen && (

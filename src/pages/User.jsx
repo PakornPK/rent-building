@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Table from '../components/Table';
-import Pagination from '../components/Pagination';
+import Pagination from '@mui/material/Pagination';
 import Button from '../components/Button'
 import Modal from '../components/Modal';
 import UploadFile from '../components/UploadFile';
@@ -10,14 +10,14 @@ import userProxy from "../proxy/userProxy";
 
 // กำหนด Columns สำหรับตาราง
 const columns = [
-  { header: 'ID', accessor: 'id' },
-  { header: 'ชื่อ', accessor: 'first_name' },
-  { header: 'นามสกุล', accessor: 'last_name' },
-  { header: 'อีเมล', accessor: 'email' },
-  { header: 'โทรศัพท์', accessor: 'phone' },
-  { header: 'active', accessor: 'is_active' },
-  { header: 'admin', accessor: 'is_admin' },
-  { header: 'เข้าระบบล่าสุด', accessor: 'last_login' },
+  { field: 'id', headerName: 'ID', flex: 1 },
+  { field: 'first_name', headerName: 'ชื่อ', flex: 1 },
+  { field: 'last_name', headerName: 'นามสกุล', flex: 1 },
+  { field: 'email', headerName: 'อีเมล', flex: 1 },
+  { field: 'phone', headerName: 'โทรศัพท์', flex: 1 },
+  { field: 'is_active', headerName: 'Active', flex: 1, type: 'boolean' },
+  { field: 'is_admin', headerName: 'Admin', flex: 1, type: 'boolean' },
+  { field: 'last_login', headerName: 'เข้าระบบล่าสุด', flex: 1 },
 ];
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -154,14 +154,16 @@ function User() {
           onEdit={(row) => viewDetailModal(row)}
           onDelete={(row) => confirmDeleteModal(row)}
         />
-
-        {/* ส่ง props ทั้งหมดไปให้ Pagination */}
-        <Pagination
-          totalItems={totalItems}
-          pageSize={pageSize}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
+        <div className="mt-4 flex justify-center">
+            <Pagination
+                count={Math.ceil(totalItems / pageSize)} // จำนวนหน้าทั้งหมด
+                page={currentPage} // หน้า active
+                onChange={(e, page) => setCurrentPage(page)} // update state แล้ว useEffect จะ fetch API
+                size='medium'
+                color="primary"
+                shape="rounded"
+            />
+        </div>
       </div>
 
       {isCreateModalOpen && (
