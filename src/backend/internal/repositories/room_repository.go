@@ -32,7 +32,6 @@ func (r *roomRepository) GetByID(id int) (*entities.Room, error) {
 		Model(&entities.Room{}).
 		Preload("Building").
 		Preload("RoomRentals").
-		Preload("Invoices").
 		First(&room, id).
 		Error; err != nil {
 		return nil, err

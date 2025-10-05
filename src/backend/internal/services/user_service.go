@@ -107,6 +107,7 @@ func (s *userService) UpdatePassword(id int, newPassword string) error {
 }
 
 func (s *userService) Delete(id int) error {
+	// TODO: don't remove user id 1 (system admin)
 	return s.userRepo.Delete(id)
 }
 

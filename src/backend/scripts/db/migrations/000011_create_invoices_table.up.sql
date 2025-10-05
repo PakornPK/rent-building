@@ -1,6 +1,6 @@
 CREATE TABLE invoices (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    room_id INT NOT NULL,
+    tenants_id INT NOT NULL,
     invoices_no VARCHAR(255) NOT NULL UNIQUE,
     amount INT NOT NULL DEFAULT 0,
     issue_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

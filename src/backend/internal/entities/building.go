@@ -8,6 +8,7 @@ type Building struct {
 	Address   string    `json:"address"`
 	Status    string    `json:"status" gorm:"not null;default:'ACTIVE'"`
 	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 	// Add a one-to-many relationship with Room
 	Rooms []Room `json:"rooms,omitempty" gorm:"foreignKey:BuildingID;references:ID"`
 }

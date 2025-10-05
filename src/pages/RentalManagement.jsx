@@ -178,7 +178,11 @@ function RentalManagement() {
         setIsConfirmOpen(true)
     };
 
-    const handleEdit = (id) => {
+    const handleEdit = async (id) => {
+        const res = await rentalsProxy.getRentalDetail(id)
+        if(!res?.ok){
+            throw new Error("Failed to get rental detail");
+        }
         setItem(rentalsList.find(item => item.id === id));  
         setIsEditModalOpen(true);
     }

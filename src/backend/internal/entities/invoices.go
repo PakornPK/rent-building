@@ -4,7 +4,7 @@ import "time"
 
 type Invoices struct {
 	ID         int       `json:"id" gorm:"primaryKey,autoIncrement"`
-	RoomID     int       `json:"room_id" gorm:"not null"`
+	TenantsID  int       `json:"tenants_id" gorm:"not null"`
 	InvoicesNo string    `json:"invoices_no" gorm:"not null;unique"`
 	Amount     int       `json:"amount" gorm:"not null;default:0"`
 	IssueDate  time.Time `json:"issue_date" gorm:"not null;default:CURRENT_TIMESTAMP"`
@@ -13,6 +13,6 @@ type Invoices struct {
 	Note       string    `json:"note"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
-	Room       *Room     `json:"room,omitempty" gorm:"foreignKey:RoomID;references:ID"`
+	Tenants    *Tenants  `json:"tenants,omitempty" gorm:"foreignKey:TenantsID;references:ID"`
 	Payments   []Payment `json:"payments,omitempty" gorm:"foreignKey:InvoicesID;references:ID"`
 }

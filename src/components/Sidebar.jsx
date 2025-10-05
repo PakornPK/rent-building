@@ -102,7 +102,7 @@ const Sidebar = () => {
             </li>
             <li className='mb-4'>
               <NavLink
-                to="/renter-management"
+                to="/tenants-management"
                 className={({ isActive }) =>
                   `flex items-center text-lg ${isActive ? 'text-blue-400' : 'hover:text-blue-400'}`
                 }

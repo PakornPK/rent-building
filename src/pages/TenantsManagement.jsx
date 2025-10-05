@@ -22,7 +22,7 @@ const COLUMNS = [
 
 const pageSize = 10; // จำนวนข้อมูลต่อหน้า
 
-function RenterManagement() {
+function TenantsManagement() {
     const [currentPage, setCurrentPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [totalItems, setTotalItems] = useState(0);
@@ -106,4 +106,4 @@ function RenterManagement() {
     );
 }
 
-export default RenterManagement
+export default TenantsManagement
