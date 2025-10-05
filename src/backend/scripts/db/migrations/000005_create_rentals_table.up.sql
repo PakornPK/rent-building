@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `products` (
+CREATE TABLE IF NOT EXISTS `rentals` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `group_id` INT NOT NULL,
     `name` VARCHAR(255) NOT NULL,

@@ -6,30 +6,30 @@ import (
 	"gorm.io/gorm"
 )
 
-type ProductRepository interface {
-	Create(product ...entities.Product) error
-	GetByID(id int) (*entities.Product, error)
-	Update(product *entities.Product) error
+type RentalRepository interface {
+	Create(product ...entities.Rental) error
+	GetByID(id int) (*entities.Rental, error)
+	Update(product *entities.Rental) error
 	Delete(id int) error
-	List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Product], error)
+	List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Rental], error)
 }
 
-type productRepository struct {
+type rentalRepository struct {
 	conn *infra.ConnectionDB
 }
 
-func NewProductRepository(conn *infra.ConnectionDB) ProductRepository {
-	return &productRepository{conn: conn}
+func NewRentalRepository(conn *infra.ConnectionDB) RentalRepository {
+	return &rentalRepository{conn: conn}
 }
 
-func (r *productRepository) Create(product ...entities.Product) error {
+func (r *rentalRepository) Create(product ...entities.Rental) error {
 	return r.conn.DB().Create(&product).Error
 }
 
-func (r *productRepository) GetByID(id int) (*entities.Product, error) {
-	var product entities.Product
+func (r *rentalRepository) GetByID(id int) (*entities.Rental, error) {
+	var product entities.Rental
 	if err := r.conn.DB().
-		Model(&entities.Product{}).
+		Model(&entities.Rental{}).
 		Preload("Group").
 		Preload("Group.Category").
 		Preload("Group.Category.Type").
@@ -40,9 +40,9 @@ func (r *productRepository) GetByID(id int) (*entities.Product, error) {
 	return &product, nil
 }
 
-func (r *productRepository) Update(product *entities.Product) error {
+func (r *rentalRepository) Update(product *entities.Rental) error {
 	result := r.conn.DB().
-		Model(&entities.Product{}).
+		Model(&entities.Rental{}).
 		Where("id = ?", product.ID).
 		Updates(product)
 	if result.Error != nil {
@@ -56,11 +56,11 @@ func (r *productRepository) Update(product *entities.Product) error {
 	return nil
 }
 
-func (r *productRepository) Delete(id int) error {
+func (r *rentalRepository) Delete(id int) error {
 	result := r.conn.DB().
-		Model(&entities.Product{}).
+		Model(&entities.Rental{}).
 		Where("id = ?", id).
-		Delete(&entities.Product{})
+		Delete(&entities.Rental{})
 	if result.Error != nil {
 		return result.Error
 	}
@@ -72,9 +72,9 @@ func (r *productRepository) Delete(id int) error {
 	return nil
 }
 
-func (r *productRepository) List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Product], error) {
+func (r *rentalRepository) List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Rental], error) {
 	var totalRows int64
-	query := r.conn.DB().Model(&entities.Product{})
+	query := r.conn.DB().Model(&entities.Rental{})
 	offset := (input.Page - 1) * input.PageSize
 	if input.Sort == "" {
 		input.Sort = "DESC"
@@ -86,7 +86,7 @@ func (r *productRepository) List(input *entities.PaginationInput) (*entities.Pag
 	if err != nil {
 		return nil, err
 	}
-	var data []*entities.Product
+	var data []*entities.Rental
 	if err := query.
 		Preload("Group").
 		Preload("Group.Category").
@@ -98,7 +98,7 @@ func (r *productRepository) List(input *entities.PaginationInput) (*entities.Pag
 		return nil, err
 	}
 	totalPages := int((totalRows + int64(input.PageSize) - 1) / int64(input.PageSize))
-	return &entities.PaginationOutput[*entities.Product]{
+	return &entities.PaginationOutput[*entities.Rental]{
 		Data:       data,
 		Page:       input.Page,
 		PageSize:   input.PageSize,

@@ -4,9 +4,9 @@ init:
 	go install go.uber.org/mock/mockgen@latest
 	go install github.com/matryer/moq@latest
 db:
-	docker compose -f scripts/docker/docker-compose.yml up -d db
+	docker compose -f scripts/docker/compose.yml up -d db
 db-down:
-	docker compose -f scripts/docker/docker-compose.yml down -v
+	docker compose -f scripts/docker/compose.yml down -v
 dev: 
 	go run cmd/app/main.go
 m migrate:

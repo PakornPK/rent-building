@@ -2,7 +2,7 @@ package entities
 
 import "time"
 
-type Product struct {
+type Rental struct {
 	ID          int       `json:"id" gorm:"primaryKey,autoIncrement"`
 	GroupID     int       `json:"group_id" gorm:"not null"`
 	Name        string    `json:"name" gorm:"not null;unique"`

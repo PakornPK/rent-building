@@ -15,29 +15,29 @@ type RentalInput struct {
 }
 
 type RentalService interface {
-	List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Product], error)
+	List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Rental], error)
 	Create(product ...RentalInput) error
-	GetByID(id int) (*entities.Product, error)
+	GetByID(id int) (*entities.Rental, error)
 	Update(id int, update *RentalInput) error
 	Delete(id int) error
 }
 
 type rentalService struct {
-	productRepo repositories.ProductRepository
+	productRepo repositories.RentalRepository
 }
 
-func NewRentalService(productRepo repositories.ProductRepository) RentalService {
+func NewRentalService(productRepo repositories.RentalRepository) RentalService {
 	return &rentalService{productRepo: productRepo}
 }
 
-func (s *rentalService) List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Product], error) {
+func (s *rentalService) List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Rental], error) {
 	return s.productRepo.List(input)
 }
 
 func (s *rentalService) Create(input ...RentalInput) error {
-	var products []entities.Product
+	var products []entities.Rental
 	for _, i := range input {
-		products = append(products, entities.Product{
+		products = append(products, entities.Rental{
 			GroupID:     i.GroupID,
 			Name:        i.Name,
 			Price:       i.Price,
@@ -49,12 +49,12 @@ func (s *rentalService) Create(input ...RentalInput) error {
 	return s.productRepo.Create(products...)
 }
 
-func (s *rentalService) GetByID(id int) (*entities.Product, error) {
+func (s *rentalService) GetByID(id int) (*entities.Rental, error) {
 	return s.productRepo.GetByID(id)
 }
 
 func (s *rentalService) Update(id int, update *RentalInput) error {
-	return s.productRepo.Update(&entities.Product{
+	return s.productRepo.Update(&entities.Rental{
 		ID:          id,
 		GroupID:     update.GroupID,
 		Name:        update.Name,

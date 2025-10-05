@@ -1,0 +1,3 @@
+INSERT INTO users
+(id, first_name, last_name, email, phone, password, organization, last_login, is_active, is_admin, access_token, access_token_expiry, refresh_token, refresh_token_expiry, created_at, updated_at, deleted_at)
+VALUES(1, 'system', 'system', 'system@rent-building.com', '098765432', '$2a$10$UekWtJDJY8JMNMqMlPvY3eWytXcEgWBwfeGOlqlkNYVV40OQQGW0q', 'system', NULL, 1, 1, NULL, NULL, NULL, NULL, '2025-10-05 10:30:45', '2025-10-05 10:30:45', NULL);

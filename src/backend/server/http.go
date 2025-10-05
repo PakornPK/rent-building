@@ -35,7 +35,7 @@ type repository struct {
 	masterType     repositories.MasterDataRepository[entities.Type]
 	masterCategory repositories.MasterDataRepository[entities.Category]
 	masterGroup    repositories.MasterDataRepository[entities.Group]
-	product        repositories.ProductRepository
+	rental         repositories.RentalRepository
 }
 
 func StartServer(conn *infra.ConnectionDB, cfg configs.Config, logger logger.Logger) error {
@@ -82,20 +82,20 @@ func InitializeRepository(conn *infra.ConnectionDB) *repository {
 	masterTypeRepo := repositories.NewMasterDataRepository[entities.Type](conn)
 	masterCategoryRepo := repositories.NewMasterDataRepository[entities.Category](conn)
 	masterGroupRepo := repositories.NewMasterDataRepository[entities.Group](conn)
-	productRepo := repositories.NewProductRepository(conn)
+	rentalRepo := repositories.NewRentalRepository(conn)
 	return &repository{
 		user:           userRepo,
 		masterType:     masterTypeRepo,
 		masterCategory: masterCategoryRepo,
 		masterGroup:    masterGroupRepo,
-		product:        productRepo,
+		rental:         rentalRepo,
 	}
 }
 
 func initializeService(repo *repository, cfg configs.Config) *server {
 	userService := services.NewUserService(repo.user)
 	authService := services.NewAuthService(userService, &cfg.Auth)
-	rentalService := services.NewRentalService(repo.product)
+	rentalService := services.NewRentalService(repo.rental)
 	masterDataService := services.NewMasterDataService(repo.masterType, repo.masterCategory, repo.masterGroup)
 	return &server{
 		auth:       authService,

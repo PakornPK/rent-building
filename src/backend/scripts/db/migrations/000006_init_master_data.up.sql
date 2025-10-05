@@ -41,7 +41,7 @@ INSERT INTO `groups` (category_id, name, description) VALUES
 (12, 'บริการอินเตอร์เน็ต', 'ค่าบริการอินเตอร์เน็ต');
 
 -- Seed data into products
-INSERT INTO products (group_id, name, price, unit, status) VALUES
+INSERT INTO rentals (group_id, name, price, unit, status) VALUES
 (1, 'ทำความสะอาดห้อง', 500.00, 'ครั้ง', 'ACTIVE'),
 (2, 'ล้างแอร์', 500.00, 'เครื่อง', 'ACTIVE'),
 (4, 'ซักอบรีด', 10.00, 'ชิ้น', 'ACTIVE'),
