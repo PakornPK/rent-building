@@ -1,0 +1,10 @@
+CREATE TABLE payments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    invoices_id INT NOT NULL,
+    amount INT NOT NULL DEFAULT 0,
+    note TEXT,
+    pay_slip_url VARCHAR(255),
+    sales_slip_url VARCHAR(255),
+    payment_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
