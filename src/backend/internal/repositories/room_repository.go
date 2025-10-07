@@ -9,7 +9,7 @@ import (
 type RoomRepository interface {
 	Create(room ...entities.Room) error
 	GetByID(id int) (*entities.Room, error)
-	Update(room *entities.Room) error
+	Update(id int, room *entities.Room) error
 	Delete(id int) error
 	List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Room], error)
 }
@@ -39,10 +39,10 @@ func (r *roomRepository) GetByID(id int) (*entities.Room, error) {
 	return &room, nil
 }
 
-func (r *roomRepository) Update(room *entities.Room) error {
+func (r *roomRepository) Update(id int, room *entities.Room) error {
 	result := r.conn.DB().
 		Model(&entities.Room{}).
-		Where("id = ?", room.ID).
+		Where("id = ?", id).
 		Updates(room)
 	if result.Error != nil {
 		return result.Error

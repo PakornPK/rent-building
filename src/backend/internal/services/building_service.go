@@ -15,6 +15,7 @@ type BuildingService interface {
 	Create(building ...BuildingInput) error
 	Update(id int, building BuildingInput) error
 	List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Building], error)
+	Dropdown() ([]entities.Building, error)
 }
 
 type buildingService struct {
@@ -46,4 +47,8 @@ func (s *buildingService) Update(id int, building BuildingInput) error {
 
 func (s *buildingService) List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Building], error) {
 	return s.repo.List(input)
+}
+
+func (s *buildingService) Dropdown() ([]entities.Building, error) {
+	return s.repo.FindAll()
 }

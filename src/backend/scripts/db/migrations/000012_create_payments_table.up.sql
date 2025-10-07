@@ -1,6 +1,6 @@
 CREATE TABLE payments (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    invoices_id INT NOT NULL,
+    invoice_id INT NOT NULL,
     amount INT NOT NULL DEFAULT 0,
     note TEXT,
     pay_slip_url VARCHAR(255),

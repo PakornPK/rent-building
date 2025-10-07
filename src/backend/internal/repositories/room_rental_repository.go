@@ -11,6 +11,7 @@ type RoomRentalRepository interface {
 	Update(id int, roomRental *entities.RoomRentals) error
 	GetByRoomID(roomID int) ([]entities.RoomRentals, error)
 	DeleteByRoomID(roomID int) error
+	DeleteByID(id int) error
 }
 
 type roomRentalRepository struct {
@@ -57,6 +58,21 @@ func (r *roomRentalRepository) Update(id int, roomRental *entities.RoomRentals) 
 func (r *roomRentalRepository) DeleteByRoomID(roomID int) error {
 	result := r.conn.DB().
 		Where("room_id = ?", roomID).
+		Delete(&entities.RoomRentals{})
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
+}
+
+func (r *roomRentalRepository) DeleteByID(id int) error {
+	result := r.conn.DB().
+		Where("id = ?", id).
 		Delete(&entities.RoomRentals{})
 	if result.Error != nil {
 		return result.Error

@@ -16,6 +16,6 @@ type Tenants struct {
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
 	DeletedAt   *time.Time `json:"deleted_at,omitempty" gorm:"index"`
-	Room        []Room     `json:"room,omitempty" gorm:"foreignKey:TenantsID;references:ID"`
-	Invoices    []Invoices `json:"invoices,omitempty" gorm:"foreignKey:TenantsID;references:ID"`
+	Room        []Room     `json:"room,omitempty" gorm:"foreignKey:TenantID;references:ID"`
+	Invoices    []Invoices `json:"invoices,omitempty" gorm:"foreignKey:TenantID;references:ID"`
 }

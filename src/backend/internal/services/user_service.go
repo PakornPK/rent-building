@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"time"
 
 	"github.com/PakornPK/rent-building/internal/entities"
@@ -107,7 +108,10 @@ func (s *userService) UpdatePassword(id int, newPassword string) error {
 }
 
 func (s *userService) Delete(id int) error {
-	// TODO: don't remove user id 1 (system admin)
+	// NOTE: ID of system admin is 1
+	if id == 1 {
+		return errors.New("user can't be deleted")
+	}
 	return s.userRepo.Delete(id)
 }
 

@@ -12,6 +12,7 @@ type BuildingRepository interface {
 	Update(id int, building *entities.Building) error
 	Delete(id int) error
 	List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Building], error)
+	FindAll() ([]entities.Building, error)
 }
 
 type buildingRepository struct {
@@ -96,4 +97,13 @@ func (r *buildingRepository) List(input *entities.PaginationInput) (*entities.Pa
 	}
 
 	return output, nil
+}
+
+func (r *buildingRepository) FindAll() ([]entities.Building, error) {
+	var building []entities.Building
+	err := r.db.DB().Model(&entities.Building{}).Find(&building).Error
+	if err != nil {
+		return nil, err
+	}
+	return building, nil
 }

@@ -12,6 +12,8 @@ type RentalRepository interface {
 	Update(product *entities.Rental) error
 	Delete(id int) error
 	List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Rental], error)
+	FindByGroupID(id int) ([]entities.Rental, error)
+	FindAll() ([]entities.Rental, error)
 }
 
 type rentalRepository struct {
@@ -105,4 +107,22 @@ func (r *rentalRepository) List(input *entities.PaginationInput) (*entities.Pagi
 		TotalRows:  totalRows,
 		TotalPages: totalPages,
 	}, nil
+}
+
+func (r *rentalRepository) FindByGroupID(id int) ([]entities.Rental, error) {
+	var rentals []entities.Rental
+	err := r.conn.DB().Model(&entities.Rental{}).Where("group_id = ?", id).Find(&rentals).Error
+	if err != nil {
+		return nil, err
+	}
+	return rentals, nil
+}
+
+func (r *rentalRepository) FindAll() ([]entities.Rental, error) {
+	var rentals []entities.Rental
+	err := r.conn.DB().Model(&entities.Rental{}).Find(&rentals).Error
+	if err != nil {
+		return nil, err
+	}
+	return rentals, nil
 }
