@@ -8,7 +8,7 @@ import (
 type RoomInput struct {
 	BuildingID int    `json:"building_id" validate:"required"`
 	TenantID   int    `json:"tenant_id,omitempty"`
-	RoomNo     string `json:"name" validate:"required"`
+	RoomNo     string `json:"room_no" validate:"required"`
 	Status     string `json:"status" validate:"required"`
 }
 

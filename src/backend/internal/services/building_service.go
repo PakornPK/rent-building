@@ -22,7 +22,7 @@ type buildingService struct {
 	repo repositories.BuildingRepository
 }
 
-func NewBuildingRepository(repo repositories.BuildingRepository) BuildingService {
+func NewBuildingService(repo repositories.BuildingRepository) BuildingService {
 	return &buildingService{repo: repo}
 }
 
@@ -30,7 +30,7 @@ func (s *buildingService) Create(building ...BuildingInput) error {
 	var be []entities.Building
 	for _, b := range building {
 		be = append(be, entities.Building{
-			Name:    b.Address,
+			Name:    b.Name,
 			Address: b.Address,
 			Status:  b.Status,
 		})

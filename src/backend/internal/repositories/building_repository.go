@@ -42,8 +42,8 @@ func (r *buildingRepository) GetByID(id int) (*entities.Building, error) {
 func (r *buildingRepository) Update(id int, building *entities.Building) error {
 	result := r.db.DB().
 		Model(&entities.Building{}).
-		Where("id = ?", building.ID).
-		Updates(building)
+		Where("id = ?", id).
+		Updates(&building)
 	if result.Error != nil {
 		return result.Error
 	}

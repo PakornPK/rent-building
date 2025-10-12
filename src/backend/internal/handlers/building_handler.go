@@ -63,17 +63,17 @@ func (h *buildingHandler) UpdateBuilding(c *fiber.Ctx) error {
 	logger := h.logger.WithRequestID(requestID).WithUserID(c.Locals("userID").(int))
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid building ID"})
 	}
 	var input services.BuildingInput
 	if err := c.BodyParser(&input); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input: " + err.Error()})
 	}
 	if err := h.service.Update(id, input); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update user"})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "unexpected error: update building: " + err.Error()})
 	}
 	logger.Info("building updated successfully")
-	return c.SendStatus(fiber.StatusNoContent)
+	return c.SendStatus(fiber.StatusOK)
 }
 
 func (h *buildingHandler) Dropdown(c *fiber.Ctx) error {

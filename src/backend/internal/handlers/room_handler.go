@@ -66,11 +66,11 @@ func (h *roomHandler) GetRoom(c *fiber.Ctx) error {
 	logger := h.logger.WithRequestID(requestID).WithUserID(c.Locals("userID").(int))
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid room ID"})
 	}
 	room, err := h.service.GetByID(id)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update user"})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update room"})
 	}
 	logger.Info("room updated successfully")
 	return c.JSON(room)
@@ -81,17 +81,20 @@ func (h *roomHandler) UpdateRoom(c *fiber.Ctx) error {
 	logger := h.logger.WithRequestID(requestID).WithUserID(c.Locals("userID").(int))
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid room ID"})
 	}
 	var input services.RoomInput
 	if err := c.BodyParser(&input); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input: " + err.Error()})
 	}
+	if input.Status != "OCCUPIED" && input.Status != "VACANT" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid status value"})
+	}
 	if err := h.service.Update(id, input); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update user"})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update room"})
 	}
 	logger.Info("room updated successfully")
-	return c.SendStatus(fiber.StatusNoContent)
+	return c.SendStatus(fiber.StatusOK)
 }
 
 func (h *roomHandler) DeleteRoom(c *fiber.Ctx) error {
@@ -99,11 +102,11 @@ func (h *roomHandler) DeleteRoom(c *fiber.Ctx) error {
 	logger := h.logger.WithRequestID(requestID).WithUserID(c.Locals("userID").(int))
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid room ID"})
 	}
 
 	if err := h.service.DeleteByID(id); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update user"})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update room"})
 	}
 	logger.Info("room deleted successfully")
 	return c.SendStatus(fiber.StatusOK)
