@@ -4,7 +4,7 @@ import Layout from './layouts/Layout';
 import Login from "./pages/Login";
 import User from './pages/User';
 import RentalManagement from './pages/RentalManagement';
-import RoomManagement from './pages/RoomManagement';
+import RoomManagementPage from './pages/RoomManagement';
 import TenantsManagement from './pages/TenantsManagement';
 import UtilitiesCost from './pages/UtilitiesCost';
 import Healthdesk from './pages/Healthdesk';
@@ -25,7 +25,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/room-management",
-        element: <RoomManagement />
+        element: <RoomManagementPage />
       },
       {
         path: "/tenants-management",

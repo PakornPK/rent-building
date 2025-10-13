@@ -1,18 +1,42 @@
-import React, { useState } from 'react'
+import React, { useState, Suspense, lazy } from 'react'
 import Button from '../components/Button'
 import Modal from '../components/Modal';
 import UploadFile from '../components/UploadFile';
 import Table from '../components/Table';
 import Pagination from '@mui/material/Pagination';
+import Box from '@mui/material/Box';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import CustomTabPanel from '../components/CustomTabPanel';
+import { BuildingOffice2Icon, KeyIcon } from '@heroicons/react/24/outline';
+import CircularLazy from '../components/CircularLazy';
 
-const COLUMNS = [
-  { field: 'id', headerName: 'ID', flex: 1 },
-  { field: 'building', headerName: 'หมายเลขตึก', flex: 1 },
-  { field: 'floor', headerName: 'หมายเลขชั้น', flex: 1 },
-  { field: 'room', headerName: 'หมายเลขห้อง', flex: 1 },
-  { field: 'price', headerName: 'ราคา (บาท)', flex: 1, type: 'number' },
-  { field: 'unit', headerName: 'หน่วย', flex: 1 },
-  { field: 'status', headerName: 'สถานะ', flex: 1 },
+
+const BuildingManagement = lazy(() => import('../components/BuildingManagement'));
+const RoomManagement = lazy(() => import('../components/RoomManagement'));
+
+function a11yProps(index) {
+    return {
+        id: `simple-tab-${index}`,
+        'aria-controls': `simple-tabpanel-${index}`,
+    };
+}
+
+
+const COLUMNS_ROOM = [
+    { field: 'id', headerName: 'ID', flex: 1 },
+    { field: 'building', headerName: 'หมายเลขตึก', flex: 1 },
+    { field: 'floor', headerName: 'หมายเลขชั้น', flex: 1 },
+    { field: 'room', headerName: 'หมายเลขห้อง', flex: 1 },
+    { field: 'price', headerName: 'ราคา (บาท)', flex: 1, type: 'number' },
+    { field: 'unit', headerName: 'หน่วย', flex: 1 },
+    { field: 'status', headerName: 'สถานะ', flex: 1 },
+];
+const COLUMNS_BUILDING = [
+    { field: 'id', headerName: 'ID', flex: 1 },
+    { field: 'name', headerName: 'ชื่อ', flex: 1 },
+    { field: 'address', headerName: 'ที่อยู่', flex: 1 },
+    { field: 'status', headerName: 'สถานะ', flex: 1 }
 ];
 
 const DATA = [
@@ -26,89 +50,65 @@ const DATA = [
         status: "มีผู้เช่า"
     }
 ]
+const MOCK_DATA_BUILDING = [
+    {
+        id: 1,
+        name: "A",
+        address: "212/225 ถ.รามคำแหง แขวงหัวหมาก เขตบางกะปิ กรุงเทพฯ 10240",
+        status: "ACTIVE",
+    }
+]
 
 const pageSize = 10;
 
-function RoomManagement() {
+function RoomManagementPage() {
+    const [isBuildingModalOpen, setIsBuildingModalOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-    };
+    const [value, setValue] = useState(0);
+    // const handlePageChange = (page) => {
+    //     setCurrentPage(page);
+    // };
+
+    const handleTabChange = (_event, newValue) => setValue(newValue);
     return (
         <div className='p-3'>
-            <div className="container px-4 mx-auto">
-                <div className='flex justify-between'>
-                    <div className='text-4xl p-3'>หน้าจัดการห้องเช่า</div>
-                    <div className='flex justify-end pb-3 pt-4'>
-                        <Button
-                            className="ml-3"
-                            onClick={() => setIsModalOpen(true)}
-                        >
-                            เพิ่มห้องเช่า
-                        </Button>
-                    </div>
-                </div>
-            </div>
-            <div className="container p-4 mx-auto mt-8">
-                <h1 className="mb-4 text-2xl font-bold">ตารางข้อมูลห้องเช่า</h1>
-                <Table
-                    data={DATA}
-                    columns={COLUMNS}
-                    onView={(row) => console.log(row.id)}
-                    onEdit={(row) => console.log(row.id)}
-                    onDelete={(row) => console.log(row.id)}
-                />
-                <div className="mt-4 flex justify-center">
-                    <Pagination
-                        count={Math.ceil(totalItems / pageSize)} // จำนวนหน้าทั้งหมด
-                        page={currentPage} // หน้า active
-                        onChange={(e, page) => setCurrentPage(page)} // update state แล้ว useEffect จะ fetch API
-                        size='medium'
-                        color="primary"
-                        shape="rounded"
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                <Tabs value={value} onChange={handleTabChange} contextMenu='pointer'>
+                    <Tab icon={<BuildingOffice2Icon />} iconPosition="start" label="จัดการอาคาร" {...a11yProps(0)} />
+                    <Tab icon={<KeyIcon />} iconPosition="start" label="จัดการห้อง" {...a11yProps(1)} />
+                </Tabs>
+            </Box>
+            <Suspense fallback={<CircularLazy />}
+            >
+                {/* Tab Panel จัดการอาคาร */}
+                <CustomTabPanel value={value} index={0}>
+                    <BuildingManagement
+                        data={MOCK_DATA_BUILDING}
+                        columns={COLUMNS_BUILDING}
+                        onEdit={(row) => console.log(row.id)}
+                        onDelete={(row) => console.log(row.id)}
+                        totalItems={totalItems}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
                     />
-                </div>
-            </div>
-
-            {isModalOpen && (
-                <Modal className="max-w-4xl">
-                    <div className='flex flex-col gap-3'>
-                        <div className='text-2xl p-4 text-center'>เพิ่มห้องเช่า</div>
-                        <div className='flex bg-neutral-200 p-3 gap-3 rounded-lg'>
-                            <div className='flex-1 border-r-1'>
-                                <label>Upload File (*.csv)</label>
-                                <div className='pr-3 pt-3'>
-                                    <UploadFile />
-                                </div>
-                            </div>
-                            <div className='flex-1'>
-                                <label>Download Example File</label>
-                                <div className='text-center pt-2'>
-                                    <Button>Download</Button>
-                                </div>
-                            </div>
-                        </div>
-                        <div className='flex justify-end gap-3'>
-                            <Button
-                                className={"w-20"}
-                                onClick={() => setIsModalOpen(false)}
-                            >
-                                Submit
-                            </Button>
-                            <Button
-                                className={"w-20 bg-rose-600 hover:bg-rose-700"}
-                                onClick={() => setIsModalOpen(false)}
-                            >
-                                Close
-                            </Button>
-                        </div>
-                    </div>
-                </Modal>
-            )}
+                </CustomTabPanel>
+                {/* Tab Panel for "จัดการห้อง" */}
+                <CustomTabPanel value={value} index={1}>
+                    <RoomManagement
+                        data={DATA}
+                        columns={COLUMNS_ROOM}
+                        onEdit={(row) => console.log(row.id)}
+                        onDelete={(row) => console.log(row.id)}
+                        totalItems={totalItems}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                    />
+                </CustomTabPanel>
+            </Suspense>
         </div>
     )
 }
 
-export default RoomManagement
+export default RoomManagementPage
