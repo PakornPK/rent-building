@@ -32,12 +32,6 @@ const COLUMNS_ROOM = [
     { field: 'unit', headerName: 'หน่วย', flex: 1 },
     { field: 'status', headerName: 'สถานะ', flex: 1 },
 ];
-const COLUMNS_BUILDING = [
-    { field: 'id', headerName: 'ID', flex: 1 },
-    { field: 'name', headerName: 'ชื่อ', flex: 1 },
-    { field: 'address', headerName: 'ที่อยู่', flex: 1 },
-    { field: 'status', headerName: 'สถานะ', flex: 1 }
-];
 
 const DATA = [
     {
@@ -50,20 +44,9 @@ const DATA = [
         status: "มีผู้เช่า"
     }
 ]
-const MOCK_DATA_BUILDING = [
-    {
-        id: 1,
-        name: "A",
-        address: "212/225 ถ.รามคำแหง แขวงหัวหมาก เขตบางกะปิ กรุงเทพฯ 10240",
-        status: "ACTIVE",
-    }
-]
 
-const pageSize = 10;
 
 function RoomManagementPage() {
-    const [isBuildingModalOpen, setIsBuildingModalOpen] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [value, setValue] = useState(0);
@@ -84,15 +67,7 @@ function RoomManagementPage() {
             >
                 {/* Tab Panel จัดการอาคาร */}
                 <CustomTabPanel value={value} index={0}>
-                    <BuildingManagement
-                        data={MOCK_DATA_BUILDING}
-                        columns={COLUMNS_BUILDING}
-                        onEdit={(row) => console.log(row.id)}
-                        onDelete={(row) => console.log(row.id)}
-                        totalItems={totalItems}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                    />
+                    <BuildingManagement />
                 </CustomTabPanel>
                 {/* Tab Panel for "จัดการห้อง" */}
                 <CustomTabPanel value={value} index={1}>
