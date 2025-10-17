@@ -1,13 +1,60 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Button from './Button'
 import Modal from './Modal';
 import UploadFile from './UploadFile';
 import Table from './Table';
 import Pagination from '@mui/material/Pagination';
+import buildingProxy from '../proxy/building';
+import roomsProxy from '../proxy/rooms';
+
+const COLUMNS = [
+    { field: 'id', headerName: 'ID', flex: 1 },
+    { field: 'building', headerName: 'หมายเลขตึก', flex: 1 },
+    { field: 'floor', headerName: 'หมายเลขชั้น', flex: 1 },
+    { field: 'room_no', headerName: 'หมายเลขห้อง', flex: 1 },
+    { field: 'status', headerName: 'สถานะ', flex: 1 },
+];
+
 
 const pageSize = 10;
-function RoomManagement({data, columns ,onEdit, onDelete, totalItems, currentPage, setCurrentPage}) {
+function RoomManagement({  }) {
+    const [currentPage, setCurrentPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [rooms, setRooms] = useState([]);
+    const [totalItems, setTotalItems] = useState(0);
+    const fetched = useRef(false);
+    const fetchRooms = async () => {
+        try {
+            const res = await roomsProxy.getRooms(currentPage, pageSize, 'ASC')
+            if (!res.ok) {
+                throw new Error("Failed to fetch buildings");
+            }
+            const data = await res.json();
+            const roomsData = data?.data.map((room) => ({
+                id: room.id,
+                building: room.building.name,
+                floor: room.floor,
+                room_no: room.room_no,
+                price: room.price,
+                unit: room.unit,
+                status: room.status,
+            }));
+                        
+            setRooms(roomsData);
+            setTotalItems(data?.total_rows);
+        } catch (err) {
+            console.error("fetchBuildings: ", err);
+            // setError(err.message);
+        }
+    }
+
+    useEffect(() => {
+        if (!fetched.current) {
+            fetched.current = true;
+            fetchRooms();
+        }
+    }, []);
+
     return (
         <div><div className="container px-4 mx-auto">
             <div className='flex justify-between'>
@@ -25,8 +72,8 @@ function RoomManagement({data, columns ,onEdit, onDelete, totalItems, currentPag
             <div className="container p-4 mx-auto mt-8">
                 <h1 className="mb-4 text-2xl font-bold">ตารางข้อมูลห้องเช่า</h1>
                 <Table
-                    data={data}
-                    columns={columns}
+                    data={rooms}
+                    columns={COLUMNS}
                     onEdit={(row) => console.log(row.id)}
                     onDelete={(row) => console.log(row.id)}
                 />

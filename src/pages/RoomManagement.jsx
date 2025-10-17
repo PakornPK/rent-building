@@ -22,17 +22,6 @@ function a11yProps(index) {
     };
 }
 
-
-const COLUMNS_ROOM = [
-    { field: 'id', headerName: 'ID', flex: 1 },
-    { field: 'building', headerName: 'หมายเลขตึก', flex: 1 },
-    { field: 'floor', headerName: 'หมายเลขชั้น', flex: 1 },
-    { field: 'room', headerName: 'หมายเลขห้อง', flex: 1 },
-    { field: 'price', headerName: 'ราคา (บาท)', flex: 1, type: 'number' },
-    { field: 'unit', headerName: 'หน่วย', flex: 1 },
-    { field: 'status', headerName: 'สถานะ', flex: 1 },
-];
-
 const DATA = [
     {
         id: 1,
@@ -71,15 +60,7 @@ function RoomManagementPage() {
                 </CustomTabPanel>
                 {/* Tab Panel for "จัดการห้อง" */}
                 <CustomTabPanel value={value} index={1}>
-                    <RoomManagement
-                        data={DATA}
-                        columns={COLUMNS_ROOM}
-                        onEdit={(row) => console.log(row.id)}
-                        onDelete={(row) => console.log(row.id)}
-                        totalItems={totalItems}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                    />
+                    <RoomManagement />
                 </CustomTabPanel>
             </Suspense>
         </div>
