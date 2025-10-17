@@ -6,6 +6,7 @@ type Room struct {
 	ID          int           `json:"id" gorm:"primaryKey,autoIncrement"`
 	BuildingID  int           `json:"building_id" gorm:"not null"`
 	TenantID    int           `json:"tenant_id"`
+	Floor       int           `json:"floor" gorm:"not null"`
 	RoomNo      string        `json:"room_no" gorm:"not null;unique"`
 	Status      string        `json:"status" gorm:"not null;default:'OCCUPIED'"` // vacant, occupied
 	CreatedAt   time.Time     `json:"created_at"`
