@@ -25,7 +25,7 @@ function getBuildings(page, pageSize, sort) {
 
 function getBuildingsDropdown() {
     return Get({
-        url: `/api/buildings/dropdown`,
+        url: `api/buildings/dropdown`,
         headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${localStorage.getItem("access_token")}` }
     });
 }

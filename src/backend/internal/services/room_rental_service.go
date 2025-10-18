@@ -8,6 +8,7 @@ import (
 type RoomInput struct {
 	BuildingID int    `json:"building_id" validate:"required"`
 	TenantID   int    `json:"tenant_id,omitempty"`
+	Floor      int    `json:"floor" validate:"required"`
 	RoomNo     string `json:"room_no" validate:"required"`
 	Status     string `json:"status" validate:"required"`
 }
@@ -47,6 +48,7 @@ func (s *roomRentalService) CreateRoom(input ...RoomInput) error {
 		rooms = append(rooms, entities.Room{
 			BuildingID: room.BuildingID,
 			TenantID:   room.TenantID,
+			Floor:      room.Floor,
 			RoomNo:     room.RoomNo,
 			Status:     room.Status,
 		})
@@ -57,6 +59,7 @@ func (s *roomRentalService) Update(id int, room RoomInput) error {
 	return s.roomRepo.Update(id, &entities.Room{
 		BuildingID: room.BuildingID,
 		TenantID:   room.TenantID,
+		Floor:      room.Floor,
 		RoomNo:     room.RoomNo,
 		Status:     room.Status,
 	})

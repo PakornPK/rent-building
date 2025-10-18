@@ -40,9 +40,7 @@ function RentalManagement() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [pageSize, setPageSize] = useState(10);
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-    };
+
 
     const fetchTypes = useCallback(async () => {
         const res = await masterDataProxy.getMasterData('type');

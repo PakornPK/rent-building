@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Button from './Button'
 import Modal from './Modal';
 import UploadFile from './UploadFile';
@@ -9,7 +9,7 @@ import roomsProxy from '../proxy/rooms';
 
 const COLUMNS = [
     { field: 'id', headerName: 'ID', flex: 1 },
-    { field: 'building', headerName: 'หมายเลขตึก', flex: 1 },
+    { field: 'building', headerName: 'ชื่ออาคาร', flex: 1 },
     { field: 'floor', headerName: 'หมายเลขชั้น', flex: 1 },
     { field: 'room_no', headerName: 'หมายเลขห้อง', flex: 1 },
     { field: 'status', headerName: 'สถานะ', flex: 1 },
@@ -17,15 +17,21 @@ const COLUMNS = [
 
 
 const pageSize = 10;
-function RoomManagement({  }) {
+function RoomManagement({ }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [rooms, setRooms] = useState([]);
+    const [buildings, setBuildings] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
+    const [item, setItem] = useState({ status: "OCCUPIED" });
+    const [buildingSelected, setBuildingSelected] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+
     const fetched = useRef(false);
-    const fetchRooms = async () => {
+    const fetchRooms = useCallback(async (page = 1) => {
+        setIsLoading(true);
         try {
-            const res = await roomsProxy.getRooms(currentPage, pageSize, 'ASC')
+            const res = await roomsProxy.getRooms(page, pageSize, 'ASC')
             if (!res.ok) {
                 throw new Error("Failed to fetch buildings");
             }
@@ -35,26 +41,80 @@ function RoomManagement({  }) {
                 building: room.building.name,
                 floor: room.floor,
                 room_no: room.room_no,
-                price: room.price,
-                unit: room.unit,
                 status: room.status,
             }));
-                        
+
             setRooms(roomsData);
             setTotalItems(data?.total_rows);
         } catch (err) {
             console.error("fetchBuildings: ", err);
             // setError(err.message);
         }
-    }
+        setIsLoading(false);
+    }, [currentPage]);
+
+    const fetchBuildings = useCallback(async () => {
+        try {
+            const res = await buildingProxy.getBuildingsDropdown()
+            if (!res.ok) {
+                throw new Error("Failed to fetch buildings");
+            }
+            const data = await res.json();
+            const buildingsData = data.map((building) => ({
+                id: building.id,
+                name: building.name,
+            }));
+            setBuildings(buildingsData);
+        } catch (err) {
+            console.error("fetchBuildings: ", err);
+            // setError(err.message);
+        }
+    }, []);
 
     useEffect(() => {
         if (!fetched.current) {
             fetched.current = true;
-            fetchRooms();
+            fetchBuildings();
         }
-    }, []);
+    }, [fetchBuildings]);
 
+    useEffect(() => {
+        fetchRooms(currentPage);
+    }, [fetchRooms, currentPage]);
+
+    const handleOnBuildingChange = (e) => {
+        setBuildingSelected({ id: parseInt(e.target.value), name: e.target.text });
+        setItem(prev => ({ ...prev, building_id: e.target.value }));
+    }
+
+    const handleSubmitCreateRooms = async () => {
+        try {
+            const payload = {
+                building_id: parseInt(item.building_id),
+                floor: item.floor,
+                room_no: item.room_no,
+                status: item.status,
+            };
+
+            const res = await roomsProxy.createRooms([payload]);
+            if (!res.ok) {
+                throw new Error("Failed to create room");
+            }
+            // Refresh the rooms list after successful creation
+            fetchRooms();
+            handleCloseModal();
+        } catch (err) {
+            console.error("handleSubmitCreateRooms: ", err);
+            // Handle error (e.g., show error message to user)
+        }
+    }
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        // setIsEditModalOpen(false);
+        setItem({ status: "OCCUPIED" });
+        setBuildingSelected({});
+    }
     return (
         <div><div className="container px-4 mx-auto">
             <div className='flex justify-between'>
@@ -76,6 +136,7 @@ function RoomManagement({  }) {
                     columns={COLUMNS}
                     onEdit={(row) => console.log(row.id)}
                     onDelete={(row) => console.log(row.id)}
+                    loading={isLoading}
                 />
                 <div className="mt-4 flex justify-center">
                     <Pagination
@@ -92,31 +153,69 @@ function RoomManagement({  }) {
             {isModalOpen && (
                 <Modal className="max-w-4xl">
                     <div className='flex flex-col gap-3'>
-                        <div className='text-2xl p-4 text-center'>เพิ่มห้องเช่า</div>
-                        <div className='flex bg-neutral-200 p-3 gap-3 rounded-lg'>
-                            <div className='flex-1 border-r-1'>
-                                <label>Upload File (*.csv)</label>
-                                <div className='pr-3 pt-3'>
-                                    <UploadFile />
-                                </div>
+                        <div className='text-2xl p-4 text-center'>เพิ่มอาคาร</div>
+                        <div>
+                            <label className="block text-sm/6 font-medium text-gray-900">เลือกอาคาร</label>
+                            <select
+                                id="type"
+                                value={buildingSelected.id || ""}
+                                onChange={handleOnBuildingChange}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
+                            >
+                                <option value="" disabled hidden>เลือกอาคาร</option>
+                                {buildings.map((item) => (
+                                    <option key={item.id} value={item.id}>{item.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="grid gap-6 mb-6 md:grid-cols-2">
+                            <div>
+                                <label className="block text-sm/6 font-medium text-gray-900">หมายเลขชั้น</label>
+                                <input
+                                    type="number"
+                                    id="type"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
+                                    placeholder="หมายเลขชั้น"
+                                    value={item.floor || ""}
+                                    onChange={(e) => setItem(prev => ({ ...prev, floor: parseInt(e.target.value) }))}
+                                />
                             </div>
-                            <div className='flex-1'>
-                                <label>Download Example File</label>
-                                <div className='text-center pt-2'>
-                                    <Button>Download</Button>
-                                </div>
+                            <div>
+                                <label className="block text-sm/6 font-medium text-gray-900">หมายเลขห้อง</label>
+                                <input
+                                    type="text"
+                                    id="type"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
+                                    placeholder="หมายเลขห้อง"
+                                    value={item.room_no || ""}
+                                    onChange={(e) => setItem(prev => ({ ...prev, room_no: e.target.value }))}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm/6 font-medium text-gray-900">หน่วย</label>
+                                <select
+                                    id="status"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
+                                    onChange={(e) => {
+                                        setItem(prev => ({ ...(prev ?? {}), status: e.target.value }));
+                                    }}
+                                    value={item?.status ?? "OCCUPIED"}
+                                >
+                                    <option value="OCCUPIED">OCCUPIED</option>
+                                    <option value="VACANT">VACANT</option>
+                                </select>
                             </div>
                         </div>
                         <div className='flex justify-end gap-3'>
                             <Button
-                                className={"w-20"}
-                                onClick={() => setIsModalOpen(false)}
+                                className="w-40"
+                                onClick={handleSubmitCreateRooms}
                             >
                                 Submit
                             </Button>
                             <Button
-                                className={"w-20 bg-rose-600 hover:bg-rose-700"}
-                                onClick={() => setIsModalOpen(false)}
+                                className="w-40 bg-rose-600 hover:bg-rose-700"
+                                onClick={handleCloseModal}
                             >
                                 Close
                             </Button>
