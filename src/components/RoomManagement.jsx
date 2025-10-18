@@ -26,6 +26,7 @@ function RoomManagement({ }) {
     const [item, setItem] = useState({ status: "OCCUPIED" });
     const [buildingSelected, setBuildingSelected] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     const fetched = useRef(false);
     const fetchRooms = useCallback(async (page = 1) => {
@@ -87,6 +88,11 @@ function RoomManagement({ }) {
         setItem(prev => ({ ...prev, building_id: e.target.value }));
     }
 
+    const confirmDeleteModal = (id) => {
+        setItem({ id });
+        setIsConfirmOpen(true)
+    };
+
     const handleSubmitCreateRooms = async () => {
         try {
             const payload = {
@@ -109,11 +115,27 @@ function RoomManagement({ }) {
         }
     }
 
+    const handleDelete = async () => {
+        try {
+            const res = await roomsProxy.deleteRooms(item.id);
+            if (!res.ok) {
+                throw new Error("Failed to delete room");
+            }
+            // Refresh the rooms list after successful deletion
+            fetchRooms();
+            setIsConfirmOpen(false);
+        } catch (err) {
+            console.error("handleDelete: ", err);
+            // Handle error (e.g., show error message to user)
+        }
+    }
+
     const handleCloseModal = () => {
         setIsModalOpen(false);
         // setIsEditModalOpen(false);
         setItem({ status: "OCCUPIED" });
         setBuildingSelected({});
+        setCurrentPage(1);
     }
     return (
         <div><div className="container px-4 mx-auto">
@@ -135,7 +157,7 @@ function RoomManagement({ }) {
                     data={rooms}
                     columns={COLUMNS}
                     onEdit={(row) => console.log(row.id)}
-                    onDelete={(row) => console.log(row.id)}
+                    onDelete={(row) => confirmDeleteModal(row.id)}
                     loading={isLoading}
                 />
                 <div className="mt-4 flex justify-center">
@@ -192,7 +214,7 @@ function RoomManagement({ }) {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm/6 font-medium text-gray-900">หน่วย</label>
+                                <label className="block text-sm/6 font-medium text-gray-900">status</label>
                                 <select
                                     id="status"
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
@@ -220,6 +242,28 @@ function RoomManagement({ }) {
                                 Close
                             </Button>
                         </div>
+                    </div>
+                </Modal>
+            )}
+
+            {isConfirmOpen && (
+                <Modal className="max-w-xs">
+                    <div>
+                        <div className='text-xl p-4 text-center'>Confirm delete?</div>
+                    </div>
+                    <div className='flex justify-center gap-3'>
+                        <Button
+                            className={"w-25 bg-rose-600 hover:bg-rose-700"}
+                            onClick={async () => await handleDelete()}
+                        >
+                            Delete
+                        </Button>
+                        <Button
+                            className={"w-25"}
+                            onClick={() => setIsConfirmOpen(false)}
+                        >
+                            Close
+                        </Button>
                     </div>
                 </Modal>
             )}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Button from './Button'
 import Modal from './Modal';
 import UploadFile from './UploadFile';
@@ -25,9 +25,9 @@ function BuildingManagement() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const fetched = useRef(false);
 
-    const fetchBuildings = async () => {
+    const fetchBuildings = useCallback(async (page = 1) => {
         try {
-            const res = await buildingProxy.getBuildings(currentPage, pageSize, 'ASC')
+            const res = await buildingProxy.getBuildings(page, pageSize, 'ASC')
             if (!res.ok) {
                 throw new Error("Failed to fetch buildings");
             }
@@ -38,14 +38,11 @@ function BuildingManagement() {
             console.error("fetchBuildings: ", err);
             // setError(err.message);
         }
-    }
+    }, []);
 
     useEffect(() => {
-        if (!fetched.current) {
-            fetched.current = true;
-            fetchBuildings();
-        }
-    }, []);
+        fetchBuildings(currentPage);
+    }, [currentPage, fetchBuildings]);
 
     const handleSubmitCreateBuilding = async () => {
         try {
@@ -104,6 +101,7 @@ function BuildingManagement() {
         setIsModalOpen(false);
         setIsEditModalOpen(false);
         setItem({});
+        setCurrentPage(1);
     }
     return (
         <div>
