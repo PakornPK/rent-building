@@ -3,8 +3,12 @@ import { DataGrid } from '@mui/x-data-grid';
 import { DocumentMagnifyingGlassIcon, TrashIcon, PencilSquareIcon } from '@heroicons/react/16/solid';
 import { IconButton } from '@mui/material';
 
-const Table = ({ data, columns, onView, onEdit, onDelete, loading }) => {
-  const actionColumn = (onView || onEdit || onDelete)
+const Table = ({ data, columns, onView, onEdit, onActions, onDelete, loading }) => {
+  if (onActions && !Array.isArray(onActions)) {
+    console.log("onActions requied array!!")
+    return
+  }
+  const actionColumn = (onView || onEdit || onDelete || onActions)
     ? {
       field: "actions",
       headerName: "Action",
@@ -13,6 +17,11 @@ const Table = ({ data, columns, onView, onEdit, onDelete, loading }) => {
       width: 150,
       renderCell: (params) => (
         <>
+          {onActions && onActions.map((act) => 
+            <IconButton key={act.key} onClick={() => act.action(params.row)}>
+              {act.icon}
+            </IconButton>
+          )}
           {onView && (
             <IconButton onClick={() => onView(params.row)}>
               <DocumentMagnifyingGlassIcon className="h-5 w-5 text-blue-600" />

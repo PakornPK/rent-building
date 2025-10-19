@@ -6,6 +6,8 @@ import Table from './Table';
 import Pagination from '@mui/material/Pagination';
 import buildingProxy from '../proxy/building';
 import roomsProxy from '../proxy/rooms';
+import TransferList from './TransferList';
+import { PlusCircleIcon } from '@heroicons/react/24/outline';
 
 const COLUMNS = [
     { field: 'id', headerName: 'ID', flex: 1 },
@@ -27,6 +29,8 @@ function RoomManagement({ }) {
     const [buildingSelected, setBuildingSelected] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isAddRentalModalOpen, setIsAddRentalModalOpen] = useState(false)
 
     const fetched = useRef(false);
     const fetchRooms = useCallback(async (page = 1) => {
@@ -88,10 +92,35 @@ function RoomManagement({ }) {
         setItem(prev => ({ ...prev, building_id: e.target.value }));
     }
 
+    const handleSubmitEditRooms = async () => {
+        try {
+            const payload = {
+                floor: item.floor,
+                room_no: item.room_no,
+                status: item.status,
+            };
+            const res = await roomsProxy.updateRooms(item.id, payload);
+            if (!res.ok) {
+                throw new Error("Failed to edit room");
+            }
+            // Refresh the rooms list after successful edit
+            fetchRooms();
+            handleCloseModal();
+        } catch (err) {
+            console.error("handleSubmitEditRooms: ", err);
+            // Handle error (e.g., show error message to user)
+        }
+    }
+
     const confirmDeleteModal = (id) => {
         setItem({ id });
         setIsConfirmOpen(true)
     };
+    
+    const addRentalModal = (id) => {
+         setItem({ id });
+         setIsAddRentalModalOpen(true)
+    }
 
     const handleSubmitCreateRooms = async () => {
         try {
@@ -130,9 +159,14 @@ function RoomManagement({ }) {
         }
     }
 
+    const editModal = (item) => {
+        setItem(item);
+        setIsEditModalOpen(true);
+    }
+
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        // setIsEditModalOpen(false);
+        setIsEditModalOpen(false);
         setItem({ status: "OCCUPIED" });
         setBuildingSelected({});
         setCurrentPage(1);
@@ -156,8 +190,13 @@ function RoomManagement({ }) {
                 <Table
                     data={rooms}
                     columns={COLUMNS}
-                    onEdit={(row) => console.log(row.id)}
+                    onEdit={(row) => editModal(row)}
                     onDelete={(row) => confirmDeleteModal(row.id)}
+                    onActions={[{
+                        key: "1",
+                        action: addRentalModal,
+                        icon: <PlusCircleIcon className="h-5 w-5 text-blue-600" />
+                    }]}
                     loading={isLoading}
                 />
                 <div className="mt-4 flex justify-center">
@@ -175,7 +214,7 @@ function RoomManagement({ }) {
             {isModalOpen && (
                 <Modal className="max-w-4xl">
                     <div className='flex flex-col gap-3'>
-                        <div className='text-2xl p-4 text-center'>เพิ่มอาคาร</div>
+                        <div className='text-2xl p-4 text-center'>เพิ่มห้องเช่า</div>
                         <div>
                             <label className="block text-sm/6 font-medium text-gray-900">เลือกอาคาร</label>
                             <select
@@ -246,6 +285,77 @@ function RoomManagement({ }) {
                 </Modal>
             )}
 
+            {isEditModalOpen && (
+                <Modal className="max-w-4xl">
+                    <div className='flex flex-col gap-3'>
+                        <div className='text-2xl p-4 text-center'>แก้ห้องเช่า</div>
+                        <div>
+                            <label className="block text-sm/6 font-medium text-gray-900">เลือกอาคาร</label>
+                            <input
+                                type='text'
+                                id="type"
+                                value={item.building || ""}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
+                                disabled
+                            >
+                            </input>
+                        </div>
+                        <div className="grid gap-6 mb-6 md:grid-cols-2">
+                            <div>
+                                <label className="block text-sm/6 font-medium text-gray-900">หมายเลขชั้น</label>
+                                <input
+                                    type="number"
+                                    id="type"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
+                                    placeholder="หมายเลขชั้น"
+                                    value={item.floor || ""}
+                                    onChange={(e) => setItem(prev => ({ ...prev, floor: parseInt(e.target.value) }))}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm/6 font-medium text-gray-900">หมายเลขห้อง</label>
+                                <input
+                                    type="text"
+                                    id="type"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
+                                    placeholder="หมายเลขห้อง"
+                                    value={item.room_no || ""}
+                                    onChange={(e) => setItem(prev => ({ ...prev, room_no: e.target.value }))}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm/6 font-medium text-gray-900">status</label>
+                                <select
+                                    id="status"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
+                                    onChange={(e) => {
+                                        setItem(prev => ({ ...(prev ?? {}), status: e.target.value }));
+                                    }}
+                                    value={item?.status ?? "OCCUPIED"}
+                                >
+                                    <option value="OCCUPIED">OCCUPIED</option>
+                                    <option value="VACANT">VACANT</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className='flex justify-end gap-3'>
+                            <Button
+                                className="w-40"
+                                onClick={handleSubmitEditRooms}
+                            >
+                                Submit
+                            </Button>
+                            <Button
+                                className="w-40 bg-rose-600 hover:bg-rose-700"
+                                onClick={handleCloseModal}
+                            >
+                                Close
+                            </Button>
+                        </div>
+                    </div>
+                </Modal>
+            )}
+
             {isConfirmOpen && (
                 <Modal className="max-w-xs">
                     <div>
@@ -261,6 +371,25 @@ function RoomManagement({ }) {
                         <Button
                             className={"w-25"}
                             onClick={() => setIsConfirmOpen(false)}
+                        >
+                            Close
+                        </Button>
+                    </div>
+                </Modal>
+            )}
+
+            {isAddRentalModalOpen && (
+                <Modal className="max-w-xl">
+                    <div>
+                        <div className='text-xl p-4 text-center'>เพิ่มรายการให้เช่า</div>
+                    </div>
+                    <div className='p-4'>
+                        <TransferList />
+                    </div>
+                    <div className='flex justify-center gap-3'>
+                        <Button
+                            className={"w-25"}
+                            onClick={() => setIsAddRentalModalOpen(false)}
                         >
                             Close
                         </Button>
