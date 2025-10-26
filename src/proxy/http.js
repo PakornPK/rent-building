@@ -30,6 +30,6 @@ export async function Patch({ url, body, headers = { 'Content-Type': 'applicatio
     return await request(url, { method: 'PATCH', body, headers });
 }
 
-export async function Delete({ url, headers = { 'Content-Type': 'application/json' } }) {
-    return await request(url, { method: 'DELETE', headers });
+export async function Delete({ url, body, headers = { 'Content-Type': 'application/json' } }) {
+    return await request(url, { method: 'DELETE', headers, body });
 }

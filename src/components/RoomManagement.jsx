@@ -125,7 +125,13 @@ function RoomManagement({ }) {
                 throw new Error("Failed to fetch rental differences");
             }
             const data = await res.json();
-            setRentalData({ left: data.unimplemented, right: data.implemented });
+            let counter = 1;
+            const unimplemented = data.unimplemented.map(rental => ({
+                ...rental,
+                id: `unimplemented-${counter++}`,
+            }));
+
+            setRentalData({ left: unimplemented, right: data.implemented });
             setItem({ row });
             setIsAddRentalModalOpen(true)
         } catch (error) {
@@ -183,6 +189,45 @@ function RoomManagement({ }) {
         setBuildingSelected({});
         setCurrentPage(1);
         setRentalData({ left: [], right: [] });
+    }
+
+    const handleAppendRentals = (rentals) => {
+        try {
+            const payload = rentals.map(rental => ({
+                room_id: item.row.id,
+                rental_id: rental.id,
+                quantity: rental.quantity,
+                price: rental.price,
+            }));
+            const res = roomsProxy.addRentals(payload)
+            if (!res.ok) {
+                throw new Error("Failed to add rentals");
+            }
+            // Refresh the rooms list after successful addition
+            fetchRooms();
+            setIsAddRentalModalOpen(false);
+        } catch (error) {
+            console.error("handleAppendRentals: ", error);
+            // Handle error (e.g., show error message to user)
+        }
+    }
+
+    const handleRemoveRentals = async (rentals) => {
+        try {
+            const payload = rentals.map(rental => ({
+                id: rental.id,
+            }));
+            const res = await roomsProxy.removeRentals(payload);
+            if (!res.ok) {
+                throw new Error("Failed to remove rental");
+            }
+            // Refresh the rooms list after successful removal
+            fetchRooms();
+            setIsAddRentalModalOpen(false);
+        } catch (error) {
+            console.error("handleRemoveRentals: ", error);
+            // Handle error (e.g., show error message to user)
+        }
     }
     return (
         <div><div className="container px-4 mx-auto">
@@ -392,12 +437,17 @@ function RoomManagement({ }) {
             )}
 
             {isAddRentalModalOpen && (
-                <Modal className="max-w-xl">
+                <Modal className="max-w-5xl">
                     <div>
                         <div className='text-xl p-4 text-center'>เพิ่มรายการให้เช่า</div>
                     </div>
                     <div className='p-4'>
-                        <TransferList dataLeft={retalData.left} dataRight={retalData.right} />
+                        <TransferList
+                            dataLeft={retalData.left}
+                            dataRight={retalData.right}
+                            onAppend={(items) => handleAppendRentals(items)}
+                            onRemove={(items) => handleRemoveRentals(items)}
+                        />
                     </div>
                     <div className='flex justify-center gap-3'>
                         <Button

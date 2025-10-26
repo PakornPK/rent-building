@@ -184,7 +184,7 @@ func roomRouter(router fiber.Router, roomHandler handlers.RoomHandler) {
 	router.Get("/:id", roomHandler.GetRoom)
 	router.Get("/:id/rental", roomHandler.ListRental)
 	router.Put("/:id", roomHandler.UpdateRoom)
-	router.Delete("/:id", roomHandler.DeleteRoom)
 	router.Post("/rental", roomHandler.AppendRoomRental)
-	router.Delete("/rental/:id", roomHandler.RemoveRoomRental)
+	router.Delete("/rental", roomHandler.RemoveRoomRental)
+	router.Delete("/:id", roomHandler.DeleteRoom)
 }

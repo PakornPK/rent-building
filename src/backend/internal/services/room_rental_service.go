@@ -20,16 +20,29 @@ type RoomRentalInput struct {
 	Price    float64 `json:"price"`
 }
 
+type DeleteRentalInput struct {
+	ID int `json:"id"`
+}
+
 type RoomRentalDiff struct {
-	Implemented   []entities.Rental `json:"implemented"`
-	Unimplemented []entities.Rental `json:"unimplemented"`
+	Implemented   []RoomRental `json:"implemented"`
+	Unimplemented []RoomRental `json:"unimplemented"`
+}
+
+type RoomRental struct {
+	ID       int     `json:"id"`
+	RoomID   int     `json:"room_id"`
+	RentalID int     `json:"rental_id"`
+	Name     string  `json:"name"`
+	Price    float64 `json:"price"`
+	Quantity int     `json:"quantity"`
 }
 
 type RoomRentalService interface {
 	CreateRoom(rooms ...RoomInput) error
 	Update(id int, room RoomInput) error
 	AppendRental(input ...RoomRentalInput) error
-	RemoveRental(roomRental int) error
+	RemoveRental(input ...DeleteRentalInput) error
 	GetByID(id int) (*entities.Room, error)
 	List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Room], error)
 	DeleteByID(id int) error
@@ -84,8 +97,12 @@ func (s *roomRentalService) AppendRental(input ...RoomRentalInput) error {
 	}
 	return s.roomRentalRepo.Create(roomRentals...)
 }
-func (s *roomRentalService) RemoveRental(id int) error {
-	return s.roomRentalRepo.DeleteByID(id)
+func (s *roomRentalService) RemoveRental(input ...DeleteRentalInput) error {
+	var ids []int
+	for _, rr := range input {
+		ids = append(ids, rr.ID)
+	}
+	return s.roomRentalRepo.DeleteByIDs(ids...)
 }
 func (s *roomRentalService) GetByID(id int) (*entities.Room, error) {
 	return s.roomRepo.GetByID(id)
@@ -106,15 +123,32 @@ func (s *roomRentalService) ListRental(roomID int) (*RoomRentalDiff, error) {
 	if err != nil {
 		return nil, err
 	}
-	implemented := make([]entities.Rental, 0)
-	unimplemented := make([]entities.Rental, 0)
+	implemented := make([]RoomRental, 0)
+	unimplemented := make([]RoomRental, 0)
 	for _, rental := range rentals {
+		impl := false
 		for _, rt := range roomRentals {
 			if rt.RentalID == rental.ID {
-				implemented = append(implemented, rental)
+				implemented = append(implemented, RoomRental{
+					ID:       rt.ID,
+					RoomID:   rt.RoomID,
+					RentalID: rt.RentalID,
+					Name:     rental.Name,
+					Price:    rt.Price,
+					Quantity: rt.Quantity,
+				})
+				impl = true
+				break
 			}
 		}
-		unimplemented = append(unimplemented, rental)
+		if !impl {
+			unimplemented = append(unimplemented, RoomRental{
+				RentalID: rental.ID,
+				Name:     rental.Name,
+				Price:    rental.Price,
+				Quantity: 1,
+			})
+		}
 	}
 	return &RoomRentalDiff{
 		Implemented:   implemented,

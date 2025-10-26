@@ -45,9 +45,10 @@ function addRentals(rentals) {
     });
 }
 
-function removeRentals(id) {
+function removeRentals(rental) {
     return Delete({
-        url: `api/rooms/rental/${id}`,
+        url: `api/rooms/rental`,
+        body: rental,
         headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${localStorage.getItem("access_token")}` }
     });
 }

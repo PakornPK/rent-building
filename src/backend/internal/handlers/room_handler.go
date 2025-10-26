@@ -131,12 +131,12 @@ func (h *roomHandler) AppendRoomRental(c *fiber.Ctx) error {
 func (h *roomHandler) RemoveRoomRental(c *fiber.Ctx) error {
 	requestID := c.Get("Request-Id", uuid.New().String())
 	logger := h.logger.WithRequestID(requestID).WithUserID(c.Locals("userID").(int))
-	id, err := c.ParamsInt("id")
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
+	req := make([]services.DeleteRentalInput, 0)
+	if err := c.BodyParser(&req); err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
-	if err := h.service.RemoveRental(id); err != nil {
+	if err := h.service.RemoveRental(req...); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update user"})
 	}
 	logger.Info("room rental deletd successfully")
