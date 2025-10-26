@@ -229,6 +229,23 @@ function RoomManagement({ }) {
             // Handle error (e.g., show error message to user)
         }
     }
+
+    const handleChangeQty = async (rental, value) => {
+        try {
+            const payload = {
+                quantity: value
+            };
+            const res = await roomsProxy.updateRental(rental, payload);
+            if (!res.ok) {
+                throw new Error("Failed to update rental quantity");
+            }
+            // Refresh the rooms list after successful update
+            fetchRooms();
+        } catch (error) {
+            console.error("handleChangeQty: ", error);
+            // Handle error (e.g., show error message to user)
+        }
+    }
     return (
         <div><div className="container px-4 mx-auto">
             <div className='flex justify-between'>
@@ -447,6 +464,7 @@ function RoomManagement({ }) {
                             dataRight={retalData.right}
                             onAppend={(items) => handleAppendRentals(items)}
                             onRemove={(items) => handleRemoveRentals(items)}
+                            onQtyChange={(items, value) => handleChangeQty(items, value)}
                         />
                     </div>
                     <div className='flex justify-center gap-3'>

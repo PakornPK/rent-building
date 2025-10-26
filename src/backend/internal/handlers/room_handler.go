@@ -16,6 +16,7 @@ type RoomHandler interface {
 	AppendRoomRental(c *fiber.Ctx) error
 	RemoveRoomRental(c *fiber.Ctx) error
 	ListRental(c *fiber.Ctx) error
+	UpdateRental(c *fiber.Ctx) error
 }
 
 type roomHandler struct {
@@ -156,4 +157,23 @@ func (h *roomHandler) ListRental(c *fiber.Ctx) error {
 	}
 	logger.Info("rental listed successfully")
 	return c.Status(fiber.StatusOK).JSON(rentals)
+}
+
+func (h *roomHandler) UpdateRental(c *fiber.Ctx) error {
+	requestID := c.Get("Request-Id", uuid.New().String())
+	logger := h.logger.WithRequestID(requestID).WithUserID(c.Locals("userID").(int))
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid room ID"})
+	}
+	var input services.RoomRentalInput
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input: " + err.Error()})
+	}
+
+	if err := h.service.UpdateRental(id, input); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update room rentals"})
+	}
+	logger.Info("room rentals updated successfully")
+	return c.SendStatus(fiber.StatusOK)
 }

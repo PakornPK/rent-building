@@ -47,6 +47,7 @@ type RoomRentalService interface {
 	List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Room], error)
 	DeleteByID(id int) error
 	ListRental(roomID int) (*RoomRentalDiff, error)
+	UpdateRental(id int, input RoomRentalInput) error
 }
 
 type roomRentalService struct {
@@ -154,4 +155,11 @@ func (s *roomRentalService) ListRental(roomID int) (*RoomRentalDiff, error) {
 		Implemented:   implemented,
 		Unimplemented: unimplemented,
 	}, nil
+}
+
+func (s *roomRentalService) UpdateRental(id int, input RoomRentalInput) error {
+	return s.roomRentalRepo.Update(id, &entities.RoomRentals{
+		Price:    input.Price,
+		Quantity: input.Quantity,
+	})
 }

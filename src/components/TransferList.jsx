@@ -38,6 +38,8 @@ export default function TransferList({
             ...prev,
             [id]: value,
         }));
+        if (isNaN(id)) return;
+        if (onQtyChange) onQtyChange(id, value);
     };
     useEffect(() => {
         if (Array.isArray(dataLeft)) setLeft(dataLeft);
