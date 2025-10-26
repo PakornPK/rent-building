@@ -8,15 +8,16 @@ import Checkbox from '@mui/material/Checkbox';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 
+// ===== Utility functions that compare by id =====
 function not(a, b) {
-    return a.filter((value) => !b.includes(value));
+    return a.filter((value) => !b.some((item) => item.id === value.id));
 }
 
 function intersection(a, b) {
-    return a.filter((value) => b.includes(value));
+    return a.filter((value) => b.some((item) => item.id === value.id));
 }
 
-export default function TransferList({ dataLeft, dataRight}) {
+export default function TransferList({ dataLeft = [], dataRight = [] }) {
     const [checked, setChecked] = useState([]);
     const [left, setLeft] = useState([]);
     const [right, setRight] = useState([]);
@@ -30,83 +31,75 @@ export default function TransferList({ dataLeft, dataRight}) {
     }, [dataLeft, dataRight]);
 
     const handleToggle = (value) => () => {
-        const currentIndex = checked.indexOf(value);
-        const newChecked = [...checked];
-
-        if (currentIndex === -1) {
-            newChecked.push(value);
-        } else {
-            newChecked.splice(currentIndex, 1);
-        }
+        const alreadyChecked = checked.some((v) => v.id === value.id);
+        const newChecked = alreadyChecked
+            ? checked.filter((v) => v.id !== value.id)
+            : [...checked, value];
 
         setChecked(newChecked);
     };
 
     const handleAllRight = () => {
-        setRight(right.concat(left));
+        setRight([...right, ...left]);
         setLeft([]);
     };
 
     const handleCheckedRight = () => {
-        setRight(right.concat(leftChecked));
+        setRight([...right, ...leftChecked]);
         setLeft(not(left, leftChecked));
         setChecked(not(checked, leftChecked));
     };
 
     const handleCheckedLeft = () => {
-        setLeft(left.concat(rightChecked));
+        setLeft([...left, ...rightChecked]);
         setRight(not(right, rightChecked));
         setChecked(not(checked, rightChecked));
     };
 
     const handleAllLeft = () => {
-        setLeft(left.concat(right));
+        setLeft([...left, ...right]);
         setRight([]);
     };
 
     const customList = (items) => (
         <Paper sx={{ width: 200, height: 230, overflow: 'auto' }}>
             <List dense component="div" role="list">
-                {Array.isArray(items) && items.map((value) => {
-                    const labelId = `transfer-list-item-${value}-label`;
-
-                    return (
-                        <ListItemButton
-                            key={value}
-                            role="listitem"
-                            onClick={handleToggle(value)}
-                        >
-                            <ListItemIcon>
-                                <Checkbox
-                                    checked={checked.includes(value)}
-                                    tabIndex={-1}
-                                    disableRipple
-                                />
-                            </ListItemIcon>
-                            <ListItemText id={labelId} primary={value} />
-                        </ListItemButton>
-                    );
-                })}
+                {Array.isArray(items) &&
+                    items.map((value) => {
+                        const labelId = `transfer-list-item-${value.id}-label`;
+                        const isChecked = checked.some((v) => v.id === value.id);
+                        return (
+                            <ListItemButton
+                                key={value.id}
+                                role="listitem"
+                                onClick={handleToggle(value)}
+                            >
+                                <ListItemIcon>
+                                    <Checkbox
+                                        checked={isChecked}
+                                        tabIndex={-1}
+                                        disableRipple
+                                    />
+                                </ListItemIcon>
+                                <ListItemText id={labelId} primary={value?.name || value} />
+                            </ListItemButton>
+                        );
+                    })}
             </List>
         </Paper>
     );
 
     return (
-        <Grid
-            container
-            spacing={2}
-            sx={{ justifyContent: 'center', alignItems: 'center' }}
-        >
-            <Grid>{customList(left)}</Grid>
-            <Grid>
-                <Grid container direction="column" sx={{ alignItems: 'center' }}>
+        <Grid container spacing={2} sx={{ justifyContent: 'center', alignItems: 'center' }}>
+            <Grid item>{customList(left)}</Grid>
+            <Grid item>
+                <Grid container direction="column" alignItems="center">
                     <Button
                         sx={{ my: 0.5 }}
                         variant="outlined"
                         size="small"
                         onClick={handleAllRight}
-                        disabled={Array.isArray(left) && left.length === 0 || true}
-                        aria-label="move all right"
+                        disabled={left.length === 0}
                     >
                         ≫
                     </Button>
@@ -115,8 +108,7 @@ export default function TransferList({ dataLeft, dataRight}) {
                         variant="outlined"
                         size="small"
                         onClick={handleCheckedRight}
-                        disabled={Array.isArray(leftChecked) && leftChecked.length === 0 || true}
-                        aria-label="move selected right"
+                        disabled={leftChecked.length === 0}
                     >
                         &gt;
                     </Button>
@@ -125,8 +117,7 @@ export default function TransferList({ dataLeft, dataRight}) {
                         variant="outlined"
                         size="small"
                         onClick={handleCheckedLeft}
-                        disabled={Array.isArray(rightChecked) && rightChecked.length === 0 || true}
-                        aria-label="move selected left"
+                        disabled={rightChecked.length === 0}
                     >
                         &lt;
                     </Button>
@@ -135,14 +126,13 @@ export default function TransferList({ dataLeft, dataRight}) {
                         variant="outlined"
                         size="small"
                         onClick={handleAllLeft}
-                        disabled={Array.isArray(right) && right.length === 0 || true}
-                        aria-label="move all left"
+                        disabled={right.length === 0}
                     >
                         ≪
                     </Button>
                 </Grid>
             </Grid>
-            <Grid>{customList(right)}</Grid>
+            <Grid item>{customList(right)}</Grid>
         </Grid>
     );
 }

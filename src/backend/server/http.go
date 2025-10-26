@@ -114,7 +114,7 @@ func initializeService(repo *repository, cfg configs.Config) *server {
 	authService := services.NewAuthService(userService, &cfg.Auth)
 	rentalService := services.NewRentalService(repo.rental)
 	masterDataService := services.NewMasterDataService(repo.masterType, repo.masterCategory, repo.masterGroup)
-	roomRentalService := services.NewRoomRentalService(repo.room, repo.rentalRoom)
+	roomRentalService := services.NewRoomRentalService(repo.room, repo.rental, repo.rentalRoom)
 	buildingService := services.NewBuildingService(repo.building)
 	return &server{
 		auth:       authService,
@@ -182,6 +182,7 @@ func roomRouter(router fiber.Router, roomHandler handlers.RoomHandler) {
 	router.Get("/", roomHandler.ListRoom)
 	router.Post("/", roomHandler.CreateRoom)
 	router.Get("/:id", roomHandler.GetRoom)
+	router.Get("/:id/rental", roomHandler.ListRental)
 	router.Put("/:id", roomHandler.UpdateRoom)
 	router.Delete("/:id", roomHandler.DeleteRoom)
 	router.Post("/rental", roomHandler.AppendRoomRental)

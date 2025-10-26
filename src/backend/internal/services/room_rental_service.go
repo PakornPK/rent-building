@@ -20,6 +20,11 @@ type RoomRentalInput struct {
 	Price    float64 `json:"price"`
 }
 
+type RoomRentalDiff struct {
+	Implemented   []entities.Rental `json:"implemented"`
+	Unimplemented []entities.Rental `json:"unimplemented"`
+}
+
 type RoomRentalService interface {
 	CreateRoom(rooms ...RoomInput) error
 	Update(id int, room RoomInput) error
@@ -28,16 +33,19 @@ type RoomRentalService interface {
 	GetByID(id int) (*entities.Room, error)
 	List(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Room], error)
 	DeleteByID(id int) error
+	ListRental(roomID int) (*RoomRentalDiff, error)
 }
 
 type roomRentalService struct {
 	roomRepo       repositories.RoomRepository
+	rentalRepo     repositories.RentalRepository
 	roomRentalRepo repositories.RoomRentalRepository
 }
 
-func NewRoomRentalService(roomRepo repositories.RoomRepository, roomRentalRepo repositories.RoomRentalRepository) RoomRentalService {
+func NewRoomRentalService(roomRepo repositories.RoomRepository, rentalRepo repositories.RentalRepository, roomRentalRepo repositories.RoomRentalRepository) RoomRentalService {
 	return &roomRentalService{
 		roomRepo:       roomRepo,
+		rentalRepo:     rentalRepo,
 		roomRentalRepo: roomRentalRepo,
 	}
 }
@@ -87,4 +95,29 @@ func (s *roomRentalService) List(input *entities.PaginationInput) (*entities.Pag
 }
 func (s *roomRentalService) DeleteByID(id int) error {
 	return s.roomRepo.Delete(id)
+}
+
+func (s *roomRentalService) ListRental(roomID int) (*RoomRentalDiff, error) {
+	roomRentals, err := s.roomRentalRepo.GetByRoomID(roomID)
+	if err != nil {
+		return nil, err
+	}
+	rentals, err := s.rentalRepo.FindAll()
+	if err != nil {
+		return nil, err
+	}
+	implemented := make([]entities.Rental, 0)
+	unimplemented := make([]entities.Rental, 0)
+	for _, rental := range rentals {
+		for _, rt := range roomRentals {
+			if rt.RentalID == rental.ID {
+				implemented = append(implemented, rental)
+			}
+		}
+		unimplemented = append(unimplemented, rental)
+	}
+	return &RoomRentalDiff{
+		Implemented:   implemented,
+		Unimplemented: unimplemented,
+	}, nil
 }

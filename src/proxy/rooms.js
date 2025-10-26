@@ -52,6 +52,13 @@ function removeRentals(id) {
     });
 }
 
+function getDiffRentalsByRoomId(id) {
+    return Get({
+        url: `api/rooms/${id}/rental`,
+        headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${localStorage.getItem("access_token")}` }
+    });
+}
+
 export default {
     createRooms,
     updateRooms,
@@ -59,5 +66,6 @@ export default {
     deleteRooms,
     getRoomDetails,
     addRentals,
-    removeRentals
+    removeRentals,
+    getDiffRentalsByRoomId
 }

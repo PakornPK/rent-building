@@ -31,6 +31,7 @@ function RoomManagement({ }) {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddRentalModalOpen, setIsAddRentalModalOpen] = useState(false)
+    const [retalData, setRentalData] = useState({ left: [], right: [] });
 
     const fetched = useRef(false);
     const fetchRooms = useCallback(async (page = 1) => {
@@ -116,10 +117,21 @@ function RoomManagement({ }) {
         setItem({ id });
         setIsConfirmOpen(true)
     };
-    
-    const addRentalModal = (id) => {
-         setItem({ id });
-         setIsAddRentalModalOpen(true)
+
+    const addRentalModal = async (row) => {
+        try {
+            const res = await roomsProxy.getDiffRentalsByRoomId(row.id);
+            if (!res.ok) {
+                throw new Error("Failed to fetch rental differences");
+            }
+            const data = await res.json();
+            setRentalData({ left: data.unimplemented, right: data.implemented });
+            setItem({ row });
+            setIsAddRentalModalOpen(true)
+        } catch (error) {
+            console.error("addRentalModal: ", error);
+            // Handle error (e.g., show error message to user)
+        }
     }
 
     const handleSubmitCreateRooms = async () => {
@@ -170,6 +182,7 @@ function RoomManagement({ }) {
         setItem({ status: "OCCUPIED" });
         setBuildingSelected({});
         setCurrentPage(1);
+        setRentalData({ left: [], right: [] });
     }
     return (
         <div><div className="container px-4 mx-auto">
@@ -384,7 +397,7 @@ function RoomManagement({ }) {
                         <div className='text-xl p-4 text-center'>เพิ่มรายการให้เช่า</div>
                     </div>
                     <div className='p-4'>
-                        <TransferList />
+                        <TransferList dataLeft={retalData.left} dataRight={retalData.right} />
                     </div>
                     <div className='flex justify-center gap-3'>
                         <Button

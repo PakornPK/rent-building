@@ -17,11 +17,20 @@ const Table = ({ data, columns, onView, onEdit, onActions, onDelete, loading }) 
       width: 150,
       renderCell: (params) => (
         <>
-          {onActions && onActions.map((act) => 
-            <IconButton key={act.key} onClick={() => act.action(params.row)}>
+          {onActions && onActions.map((act) => (
+            <IconButton
+              key={act.key}
+              onClick={async () => {
+                try {
+                  await act.action(params.row);
+                } catch (err) {
+                  console.error(err);
+                }
+              }}
+            >
               {act.icon}
             </IconButton>
-          )}
+          ))}
           {onView && (
             <IconButton onClick={() => onView(params.row)}>
               <DocumentMagnifyingGlassIcon className="h-5 w-5 text-blue-600" />
