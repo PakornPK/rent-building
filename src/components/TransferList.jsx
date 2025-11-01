@@ -68,7 +68,7 @@ export default function TransferList({
         const check = leftChecked.map(item => ({
             ...item,
             quantity: quantities[item.id] ?? item.quantity ?? 1,
-        }));
+        }));   
         if (onAppend) await onAppend(check)
     };
 

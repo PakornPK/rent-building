@@ -195,7 +195,7 @@ function RoomManagement({ }) {
         try {
             const payload = rentals.map(rental => ({
                 room_id: item.row.id,
-                rental_id: rental.id,
+                rental_id: rental.rental_id,
                 quantity: rental.quantity,
                 price: rental.price,
             }));
