@@ -23,6 +23,7 @@ type handler struct {
 	masterData handlers.MasterDataHandler
 	room       handlers.RoomHandler
 	building   handlers.BuildingHandler
+	tenants    handlers.TenantsHandler
 }
 
 type server struct {
@@ -32,6 +33,7 @@ type server struct {
 	masterData services.MasterDataService
 	roomRental services.RoomRentalService
 	building   services.BuildingService
+	tenants    services.TenantsService
 }
 
 type repository struct {
@@ -43,6 +45,7 @@ type repository struct {
 	building       repositories.BuildingRepository
 	room           repositories.RoomRepository
 	rentalRoom     repositories.RoomRentalRepository
+	tenants        repositories.TenantsRepository
 }
 
 func StartServer(conn *infra.ConnectionDB, cfg configs.Config, logger logger.Logger) error {
@@ -86,6 +89,8 @@ func initializedRouter(app *fiber.App, handler *handler, cfg configs.Config) {
 	buildingRouter(building, handler.building)
 	room := api.Group("/rooms").Use(authMiddleware)
 	roomRouter(room, handler.room)
+	tenants := api.Group("/tenants").Use(authMiddleware)
+	tenantsRouter(tenants, handler.tenants)
 }
 
 func InitializeRepository(conn *infra.ConnectionDB) *repository {
@@ -97,6 +102,7 @@ func InitializeRepository(conn *infra.ConnectionDB) *repository {
 	buildingRepo := repositories.NewBuildingRepository(conn)
 	roomRepo := repositories.NewRoomRepository(conn)
 	roomRentalRepo := repositories.NewRoomRentalRepository(conn)
+	tenantsRepo := repositories.NewTenantsRepository(conn)
 	return &repository{
 		user:           userRepo,
 		masterType:     masterTypeRepo,
@@ -106,6 +112,7 @@ func InitializeRepository(conn *infra.ConnectionDB) *repository {
 		building:       buildingRepo,
 		room:           roomRepo,
 		rentalRoom:     roomRentalRepo,
+		tenants:        tenantsRepo,
 	}
 }
 
@@ -116,6 +123,7 @@ func initializeService(repo *repository, cfg configs.Config) *server {
 	masterDataService := services.NewMasterDataService(repo.masterType, repo.masterCategory, repo.masterGroup)
 	roomRentalService := services.NewRoomRentalService(repo.room, repo.rental, repo.rentalRoom)
 	buildingService := services.NewBuildingService(repo.building)
+	tenantsService := services.NewTenantsService(repo.tenants)
 	return &server{
 		auth:       authService,
 		user:       userService,
@@ -123,6 +131,7 @@ func initializeService(repo *repository, cfg configs.Config) *server {
 		masterData: masterDataService,
 		roomRental: roomRentalService,
 		building:   buildingService,
+		tenants:    tenantsService,
 	}
 }
 
@@ -134,6 +143,7 @@ func initializeHandlers(service *server, cfg configs.Config, logger logger.Logge
 	masterDataHandler := handlers.NewMasterDataHandler(service.masterData)
 	buildingHandler := handlers.NewBuildingHandler(service.building, logger)
 	roomHandler := handlers.NewRoomHandler(service.roomRental, logger)
+	tenantsHandler := handlers.NewTenantsHandler(service.tenants, logger)
 	return &handler{
 		auth:       authHandler,
 		user:       userHandler,
@@ -141,6 +151,7 @@ func initializeHandlers(service *server, cfg configs.Config, logger logger.Logge
 		masterData: masterDataHandler,
 		room:       roomHandler,
 		building:   buildingHandler,
+		tenants:    tenantsHandler,
 	}
 }
 
@@ -188,4 +199,12 @@ func roomRouter(router fiber.Router, roomHandler handlers.RoomHandler) {
 	router.Post("/rental", roomHandler.AppendRoomRental)
 	router.Delete("/rental", roomHandler.RemoveRoomRental)
 	router.Delete("/:id", roomHandler.DeleteRoom)
+}
+
+func tenantsRouter(router fiber.Router, tenantsHandler handlers.TenantsHandler) {
+	router.Get("/", tenantsHandler.ListTenants)
+	router.Post("/", tenantsHandler.CreateTenant)
+	router.Get("/:id", tenantsHandler.GetTenant)
+	router.Put("/:id", tenantsHandler.UpdateTenant)
+	router.Delete("/:id", tenantsHandler.DeleteTenant)
 }

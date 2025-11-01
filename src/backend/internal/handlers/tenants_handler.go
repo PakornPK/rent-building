@@ -84,9 +84,7 @@ func (h *tenantsHandler) DeleteTenant(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid Tenant ID"})
 	}
-	if userID == id {
-		return c.SendStatus(fiber.StatusBadRequest)
-	}
+
 	if err := h.service.DeleteTenant(id); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to delete user"})
 	}

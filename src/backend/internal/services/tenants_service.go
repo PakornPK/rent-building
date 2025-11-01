@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"time"
 
 	"github.com/PakornPK/rent-building/internal/entities"
@@ -8,28 +9,28 @@ import (
 )
 
 type TenantsInput struct {
-	Name        string
-	Email       string
-	Phone       string
-	IDCard      string
-	StartDate   string
-	EndDate     string
-	Status      string
-	ContractURL string
-	ImageURL    string
+	Name        string `json:"name"`
+	Email       string `json:"email"`
+	Phone       string `json:"phone"`
+	IDCard      string `json:"id_card"`
+	StartDate   string `json:"start_date"`
+	EndDate     string `json:"end_date"`
+	Status      string `json:"status"`
+	ContractURL string `json:"contract_url"`
+	ImageURL    string `json:"image_url"`
 }
 
 type TenantsOutput struct {
-	ID          int
-	Name        string
-	Email       string
-	Phone       string
-	IDCard      string
-	StartDate   string
-	EndDate     string
-	Status      string
-	ContractURL string
-	ImageURL    string
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	Email       string `json:"email"`
+	Phone       string `json:"phone"`
+	IDCard      string `json:"id_card"`
+	StartDate   string `json:"start_date"`
+	EndDate     string `json:"end_date"`
+	Status      string `json:"status"`
+	ContractURL string `json:"contract_url"`
+	ImageURL    string `json:"image_url"`
 }
 
 type TenantsService interface {
@@ -37,7 +38,7 @@ type TenantsService interface {
 	GetTenantByID(id int) (*TenantsOutput, error)
 	UpdateTenant(id int, tenant TenantsInput) error
 	DeleteTenant(id int) error
-	ListTenants(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Tenants], error)
+	ListTenants(input *entities.PaginationInput) (*entities.PaginationOutput[*TenantsOutput], error)
 }
 
 type tenantsService struct {
@@ -51,13 +52,19 @@ func NewTenantsService(tenantsRepo repositories.TenantsRepository) TenantsServic
 func (s *tenantsService) CreateTenant(tenant ...TenantsInput) error {
 	var tenants []entities.Tenants
 	for _, t := range tenant {
+		if t.StartDate == "" {
+			t.StartDate = time.Now().Format("2006-01-02")
+		}
+		if t.IDCard == "" {
+			return errors.New("ID Card is required")
+		}
 		tenants = append(tenants, entities.Tenants{
 			Name:        t.Name,
 			Email:       t.Email,
 			Phone:       t.Phone,
 			IDCard:      t.IDCard,
 			StartDate:   parseDate(t.StartDate),
-			EndDate:     parseDate(t.EndDate),
+			EndDate:     parseDatePtr(t.EndDate),
 			Status:      t.Status,
 			ContractURL: t.ContractURL,
 			ImageURL:    t.ImageURL,
@@ -78,7 +85,7 @@ func (s *tenantsService) GetTenantByID(id int) (*TenantsOutput, error) {
 		Phone:       tenant.Phone,
 		IDCard:      tenant.IDCard,
 		StartDate:   tenant.StartDate.Format("2006-01-02"),
-		EndDate:     tenant.EndDate.Format("2006-01-02"),
+		EndDate:     formatDatePtr(tenant.EndDate),
 		Status:      tenant.Status,
 		ContractURL: tenant.ContractURL,
 		ImageURL:    tenant.ImageURL,
@@ -90,9 +97,8 @@ func (s *tenantsService) UpdateTenant(id int, tenant TenantsInput) error {
 		Name:        tenant.Name,
 		Email:       tenant.Email,
 		Phone:       tenant.Phone,
-		IDCard:      tenant.IDCard,
 		StartDate:   parseDate(tenant.StartDate),
-		EndDate:     parseDate(tenant.EndDate),
+		EndDate:     parseDatePtr(tenant.EndDate),
 		Status:      tenant.Status,
 		ContractURL: tenant.ContractURL,
 		ImageURL:    tenant.ImageURL,
@@ -103,8 +109,33 @@ func (s *tenantsService) DeleteTenant(id int) error {
 	return s.tenantsRepo.Delete(id)
 }
 
-func (s *tenantsService) ListTenants(input *entities.PaginationInput) (*entities.PaginationOutput[*entities.Tenants], error) {
-	return s.tenantsRepo.List(input)
+func (s *tenantsService) ListTenants(input *entities.PaginationInput) (*entities.PaginationOutput[*TenantsOutput], error) {
+	list, err := s.tenantsRepo.List(input)
+	if err != nil {
+		return nil, err
+	}
+	var tenants []*TenantsOutput
+	for _, tenant := range list.Data {
+		tenants = append(tenants, &TenantsOutput{
+			ID:          tenant.ID,
+			Name:        tenant.Name,
+			Email:       tenant.Email,
+			Phone:       tenant.Phone,
+			IDCard:      tenant.IDCard,
+			StartDate:   tenant.StartDate.Format("2006-01-02"),
+			EndDate:     formatDatePtr(tenant.EndDate),
+			Status:      tenant.Status,
+			ContractURL: tenant.ContractURL,
+			ImageURL:    tenant.ImageURL,
+		})
+	}
+	return &entities.PaginationOutput[*TenantsOutput]{
+		Data:       tenants,
+		TotalPages: list.TotalPages,
+		Page:       list.Page,
+		PageSize:   list.PageSize,
+		TotalRows:  list.TotalRows,
+	}, nil
 }
 
 func parseDate(dateStr string) time.Time {
@@ -114,4 +145,20 @@ func parseDate(dateStr string) time.Time {
 		return time.Time{}
 	}
 	return t
+}
+
+func parseDatePtr(dateStr string) *time.Time {
+	layout := "2006-01-02"
+	t, err := time.Parse(layout, dateStr)
+	if err != nil {
+		return nil
+	}
+	return &t
+}
+
+func formatDatePtr(t *time.Time) string {
+	if t == nil {
+		return ""
+	}
+	return t.Format("2006-01-02")
 }
