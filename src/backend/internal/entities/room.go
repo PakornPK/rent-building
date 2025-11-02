@@ -8,7 +8,7 @@ type Room struct {
 	TenantID    int           `json:"tenant_id"`
 	Floor       int           `json:"floor" gorm:"not null"`
 	RoomNo      string        `json:"room_no" gorm:"not null;unique"`
-	Status      string        `json:"status" gorm:"not null;default:'OCCUPIED'"` // vacant, occupied
+	Status      string        `json:"status" gorm:"not null;default:'VACANT'"` // vacant, occupied
 	CreatedAt   time.Time     `json:"created_at"`
 	UpdatedAt   time.Time     `json:"updated_at"`
 	Building    *Building     `json:"building,omitempty" gorm:"foreignKey:BuildingID;references:ID"`

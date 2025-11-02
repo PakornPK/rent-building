@@ -23,7 +23,7 @@ func main() {
 	}
 	defer logger.Sync()
 
-	db := infra.NewDatabase(&cfg.Database)
+	db := infra.NewDatabase(&cfg.Database, !cfg.App.IsProduction())
 	err = db.Connect()
 	if err != nil {
 		logger.Fatal(fmt.Sprintf("Failed to connect to database: %v", err))

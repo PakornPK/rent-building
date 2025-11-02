@@ -68,6 +68,28 @@ function updateRental(rentalId, rental) {
     });
 }
 
+function getRoomVacant() {
+    return Get({
+        url: `api/rooms/dropdown?status=VACANT`,
+        headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${localStorage.getItem("access_token")}` }
+    });
+}
+
+function swapRoom(tenantID, current, traget) {
+    return Post({
+        url: `api/rooms/swap`,
+        body: { tenant_id: tenantID, current: current, traget: traget },
+        headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${localStorage.getItem("access_token")}` }
+    });
+}
+
+function getCurrentRoom(id){
+    return Get({
+        url: `api/rooms/dropdown?tenant_id=${id}`,
+        headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${localStorage.getItem("access_token")}` }
+    });
+}
+
 export default {
     createRooms,
     updateRooms,
@@ -77,5 +99,8 @@ export default {
     addRentals,
     removeRentals,
     getDiffRentalsByRoomId,
-    updateRental
+    updateRental,
+    getRoomVacant,
+    swapRoom,
+    getCurrentRoom
 }

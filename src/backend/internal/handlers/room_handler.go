@@ -17,6 +17,8 @@ type RoomHandler interface {
 	RemoveRoomRental(c *fiber.Ctx) error
 	ListRental(c *fiber.Ctx) error
 	UpdateRental(c *fiber.Ctx) error
+	Dropdown(c *fiber.Ctx) error
+	SwapRoom(C *fiber.Ctx) error
 }
 
 type roomHandler struct {
@@ -175,5 +177,34 @@ func (h *roomHandler) UpdateRental(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update room rentals"})
 	}
 	logger.Info("room rentals updated successfully")
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (h *roomHandler) Dropdown(c *fiber.Ctx) error {
+	requestID := c.Get("Request-Id", uuid.New().String())
+	logger := h.logger.WithRequestID(requestID).WithUserID(c.Locals("userID").(int))
+
+	rooms, err := h.service.GetAll(c.Queries())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get all room"})
+	}
+	logger.Info("get all room successfully")
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"data": rooms,
+	})
+}
+
+func (h *roomHandler) SwapRoom(c *fiber.Ctx) error {
+	requestID := c.Get("Request-Id", uuid.New().String())
+	logger := h.logger.WithRequestID(requestID).WithUserID(c.Locals("userID").(int))
+	var input services.RoomSwapInput
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input: " + err.Error()})
+	}
+
+	if err := h.service.SwapRoom(input.TenantID, input.Current, input.Traget); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to swap room"})
+	}
+	logger.Info("room swaped successfully")
 	return c.SendStatus(fiber.StatusOK)
 }

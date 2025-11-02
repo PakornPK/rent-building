@@ -20,6 +20,12 @@ type RoomRentalInput struct {
 	Price    float64 `json:"price"`
 }
 
+type RoomSwapInput struct {
+	TenantID int `json:"tenant_id" validate:"required"`
+	Current  int `json:"current,omitempty"`
+	Traget   int `json:"traget" validate:"required"`
+}
+
 type DeleteRentalInput struct {
 	ID int `json:"id"`
 }
@@ -48,6 +54,8 @@ type RoomRentalService interface {
 	DeleteByID(id int) error
 	ListRental(roomID int) (*RoomRentalDiff, error)
 	UpdateRental(id int, input RoomRentalInput) error
+	GetAll(filter map[string]string) ([]entities.Room, error)
+	SwapRoom(tenantID, current, target int) error
 }
 
 type roomRentalService struct {
@@ -162,4 +170,12 @@ func (s *roomRentalService) UpdateRental(id int, input RoomRentalInput) error {
 		Price:    input.Price,
 		Quantity: input.Quantity,
 	})
+}
+
+func (s *roomRentalService) GetAll(filter map[string]string) ([]entities.Room, error) {
+	return s.roomRepo.FindAllByFilter(filter)
+}
+
+func (s *roomRentalService) SwapRoom(tenantID, current, target int) error {
+	return s.roomRepo.SwapRoom(tenantID, current, target)
 }

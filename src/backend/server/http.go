@@ -191,7 +191,9 @@ func buildingRouter(router fiber.Router, buildingHandler handlers.BuildingHandle
 
 func roomRouter(router fiber.Router, roomHandler handlers.RoomHandler) {
 	router.Get("/", roomHandler.ListRoom)
+	router.Get("/dropdown", roomHandler.Dropdown)
 	router.Post("/", roomHandler.CreateRoom)
+	router.Post("/swap", roomHandler.SwapRoom)
 	router.Get("/:id", roomHandler.GetRoom)
 	router.Get("/:id/rental", roomHandler.ListRental)
 	router.Put("/:id", roomHandler.UpdateRoom)

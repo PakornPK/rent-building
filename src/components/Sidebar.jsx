@@ -111,7 +111,7 @@ const Sidebar = () => {
                 จัดการผู้เช่า
               </NavLink>
             </li>
-            <li className='mb-4'>
+            {/* <li className='mb-4'>
               <NavLink
                 to="/utilities-cost"
                 className={({ isActive }) =>
@@ -132,7 +132,7 @@ const Sidebar = () => {
                 <WrenchScrewdriverIcon className='h-5 w-5 mr-3' />
                 แจ้งซ่อม
               </NavLink>
-            </li>
+            </li> */}
           </ul>
           <ul className='absolute bottom-0'>
             <li className='mb-4' onClick={ async () => await logout()}>
