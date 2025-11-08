@@ -24,6 +24,7 @@ type handler struct {
 	room       handlers.RoomHandler
 	building   handlers.BuildingHandler
 	tenants    handlers.TenantsHandler
+	dashboard  handlers.DashboardHandler
 }
 
 type server struct {
@@ -91,6 +92,8 @@ func initializedRouter(app *fiber.App, handler *handler, cfg configs.Config) {
 	roomRouter(room, handler.room)
 	tenants := api.Group("/tenants").Use(authMiddleware)
 	tenantsRouter(tenants, handler.tenants)
+	dashboard := api.Group("/dashboard").Use(authMiddleware)
+	dashboardHandler(dashboard, handler.dashboard)
 }
 
 func InitializeRepository(conn *infra.ConnectionDB) *repository {
@@ -144,6 +147,7 @@ func initializeHandlers(service *server, cfg configs.Config, logger logger.Logge
 	buildingHandler := handlers.NewBuildingHandler(service.building, logger)
 	roomHandler := handlers.NewRoomHandler(service.roomRental, logger)
 	tenantsHandler := handlers.NewTenantsHandler(service.tenants, logger)
+	dashboardHnadler := handlers.NewDashboardHandler(service.roomRental)
 	return &handler{
 		auth:       authHandler,
 		user:       userHandler,
@@ -152,6 +156,7 @@ func initializeHandlers(service *server, cfg configs.Config, logger logger.Logge
 		room:       roomHandler,
 		building:   buildingHandler,
 		tenants:    tenantsHandler,
+		dashboard:  dashboardHnadler,
 	}
 }
 
@@ -210,4 +215,8 @@ func tenantsRouter(router fiber.Router, tenantsHandler handlers.TenantsHandler) 
 	router.Get("/:id", tenantsHandler.GetTenant)
 	router.Put("/:id", tenantsHandler.UpdateTenant)
 	router.Delete("/:id", tenantsHandler.DeleteTenant)
+}
+
+func dashboardHandler(router fiber.Router, dashboardHandler handlers.DashboardHandler) {
+	router.Get("/", dashboardHandler.GetDashboard)
 }
