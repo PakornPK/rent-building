@@ -20,10 +20,15 @@ function deleteTenant(id) {
     return Delete({ url: `api/tenants/${id}`, headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${localStorage.getItem("access_token")}` } });
 }
 
+function downloadBill(id) { 
+    return Post({ url: 'api/tenants/invoice', body: {tenant_id:id}, headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${localStorage.getItem("access_token")}` } });
+}
+
 export default {
     getTenants,
     getTenant,
     createTenant,
     updateTenant,
     deleteTenant,
+    downloadBill
 };

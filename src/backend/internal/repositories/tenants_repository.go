@@ -27,13 +27,18 @@ func (r *tenantsRepository) Create(tenant ...entities.Tenants) error {
 
 func (r *tenantsRepository) GetByID(id int) (*entities.Tenants, error) {
 	var tenant entities.Tenants
-	if err := r.conn.DB().Model(&entities.Tenants{}).First(&tenant, id).Error; err != nil {
+	if err := r.conn.DB().
+		Model(&entities.Tenants{}).
+		Preload("Room").
+		Preload("Room.RoomRentals").
+		Preload("Room.RoomRentals.Rental").
+		First(&tenant, id).Error; err != nil {
 		return nil, err
 	}
 	return &tenant, nil
 }
 
-func (r *tenantsRepository) Update(id int,tenant entities.Tenants) error {
+func (r *tenantsRepository) Update(id int, tenant entities.Tenants) error {
 	return r.conn.DB().Model(&entities.Tenants{}).Where("id = ?", id).Updates(&tenant).Error
 }
 

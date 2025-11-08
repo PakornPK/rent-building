@@ -13,6 +13,7 @@ type TenantsHandler interface {
 	UpdateTenant(c *fiber.Ctx) error
 	DeleteTenant(c *fiber.Ctx) error
 	ListTenants(c *fiber.Ctx) error
+	Invoice(c *fiber.Ctx) error
 }
 
 type tenantsHandler struct {
@@ -107,4 +108,24 @@ func (h *tenantsHandler) ListTenants(c *fiber.Ctx) error {
 	}
 	logger.Info("Tenents listed successfully")
 	return c.Status(fiber.StatusOK).JSON(users)
+}
+
+func (h *tenantsHandler) Invoice(c *fiber.Ctx) error {
+	requestID := c.Get("Request-Id", uuid.New().String())
+	logger := h.logger.WithRequestID(requestID).WithUserID(c.Locals("userID").(int))
+
+	var input services.InvoiceInput
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input: " + err.Error()})
+	}
+
+	pdfBytes, err := h.service.CreateInvoice(input)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	c.Set("Content-Type", "application/pdf")
+	c.Set("Content-Disposition", "inline; filename=invoice.pdf")
+	logger.Info("Tenant invoice created successful")
+	return c.Send(pdfBytes)
 }

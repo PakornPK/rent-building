@@ -206,6 +206,7 @@ func roomRouter(router fiber.Router, roomHandler handlers.RoomHandler) {
 func tenantsRouter(router fiber.Router, tenantsHandler handlers.TenantsHandler) {
 	router.Get("/", tenantsHandler.ListTenants)
 	router.Post("/", tenantsHandler.CreateTenant)
+	router.Post("/invoice", tenantsHandler.Invoice)
 	router.Get("/:id", tenantsHandler.GetTenant)
 	router.Put("/:id", tenantsHandler.UpdateTenant)
 	router.Delete("/:id", tenantsHandler.DeleteTenant)

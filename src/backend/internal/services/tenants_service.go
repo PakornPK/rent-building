@@ -1,11 +1,14 @@
 package services
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/PakornPK/rent-building/internal/entities"
 	"github.com/PakornPK/rent-building/internal/repositories"
+	"github.com/jung-kurt/gofpdf"
 )
 
 type TenantsInput struct {
@@ -33,12 +36,17 @@ type TenantsOutput struct {
 	ImageURL    string `json:"image_url"`
 }
 
+type InvoiceInput struct {
+	TenantID int `json:"tenant_id"`
+}
+
 type TenantsService interface {
 	CreateTenant(tenant ...TenantsInput) error
 	GetTenantByID(id int) (*TenantsOutput, error)
 	UpdateTenant(id int, tenant TenantsInput) error
 	DeleteTenant(id int) error
 	ListTenants(input *entities.PaginationInput) (*entities.PaginationOutput[*TenantsOutput], error)
+	CreateInvoice(input InvoiceInput) ([]byte, error)
 }
 
 type tenantsService struct {
@@ -136,6 +144,56 @@ func (s *tenantsService) ListTenants(input *entities.PaginationInput) (*entities
 		PageSize:   list.PageSize,
 		TotalRows:  list.TotalRows,
 	}, nil
+}
+
+func (s *tenantsService) CreateInvoice(input InvoiceInput) ([]byte, error) {
+	tenent, err := s.tenantsRepo.GetByID(input.TenantID)
+	if err != nil {
+		return nil, err
+	}
+	// NOTE: support only 1 tenant to 1 room
+	if len(tenent.Room) < 1 {
+		return nil, errors.New("tenant not hava room rental")
+	}
+	room := tenent.Room[0]
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddUTF8Font("THSarabunNew", "", "THSarabunNew.ttf")
+	pdf.AddPage()
+	pdf.SetFont("Helvetica", "B", 20)
+	pdf.Cell(0, 10, "Invoice")
+	pdf.Ln(12)
+
+	pdf.SetFont("Helvetica", "", 14)
+	pdf.Cell(40, 10, "Room:")
+	pdf.Cell(0, 10, room.RoomNo)
+	pdf.Ln(8)
+	pdf.Cell(40, 10, "Tenant:")
+	pdf.SetFont("THSarabunNew", "", 24)
+	pdf.Cell(0, 10, tenent.Name)
+	pdf.Ln(12)
+
+	pdf.SetFont("Helvetica", "B", 14)
+	pdf.CellFormat(80, 10, "List", "1", 0, "", false, 0, "")
+	pdf.CellFormat(50, 10, "Price", "1", 0, "", false, 0, "")
+	pdf.CellFormat(20, 10, "Qty", "1", 1, "", false, 0, "")
+	total := 0.0
+	pdf.SetFont("THSarabunNew", "", 18)
+	for _, rental := range room.RoomRentals {
+		pdf.CellFormat(80, 10, rental.Rental.Name, "1", 0, "", false, 0, "")
+		pdf.CellFormat(50, 10, fmt.Sprintf("%.2f", rental.Price), "1", 0, "", false, 0, "")
+		pdf.CellFormat(20, 10, fmt.Sprintf("%d", rental.Quantity), "1", 1, "", false, 0, "")
+		total += (rental.Price * float64(rental.Quantity))
+	}
+
+	pdf.SetFont("Helvetica", "B", 14)
+	pdf.CellFormat(80, 10, "Total", "1", 0, "", false, 0, "")
+	pdf.CellFormat(70, 10, fmt.Sprintf("%.2f", total), "1", 1, "", false, 0, "")
+
+	var buf bytes.Buffer
+	if err := pdf.Output(&buf); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
 func parseDate(dateStr string) time.Time {

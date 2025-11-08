@@ -148,8 +148,19 @@ function TenantsManagement() {
         }
     }
 
-    const billing = async () => {
-
+    const billing = async (row) => {
+        try {
+            const res = await tenantsProxy.downloadBill(row.id)
+            if (!res?.ok) {
+                throw new Error("Failed to delete tenant detail");
+            }
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            window.open(url, "_blank");
+            setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+        } catch (error) {
+            console.error("billing : ", error)
+        }
     }
 
 
